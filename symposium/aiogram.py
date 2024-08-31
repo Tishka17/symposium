@@ -6,7 +6,7 @@ from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, TelegramOb
 
 from symposium.events import Click
 from symposium.handle import EventContext
-from symposium.render import KeyboardButton
+from symposium.render import KeyboardButton, Text
 from symposium.render import RenderingResult, Keyboard
 from symposium.router import SimpleRouter
 
@@ -39,6 +39,15 @@ def to_inline_keyboard(data: RenderingResult) -> None | InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=new_buttons,
     )
+
+
+def to_text(data: RenderingResult) -> str:
+    res = ""
+    for item in data.items:
+        if not isinstance(item, Text):
+            continue
+        res += item.text
+    return res
 
 
 class AiogramRouterAdapter(AiogramRouter):

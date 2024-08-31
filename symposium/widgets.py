@@ -1,6 +1,6 @@
 from symposium.events import Click
 from symposium.handle import Router, EventContext, HandlingWidget
-from symposium.render import Renderer, RenderingContext, RenderingResult, Keyboard, KeyboardButton
+from symposium.render import Renderer, RenderingContext, RenderingResult, Keyboard, KeyboardButton, Text
 
 
 class Button(HandlingWidget, Renderer):
@@ -28,3 +28,34 @@ class Button(HandlingWidget, Renderer):
                 )]]),
             ]
         )
+
+
+class Format(Renderer):
+    def __init__(self, text: str):
+        self.text = text
+
+    def register(self, router: Router) -> None:
+        pass
+
+    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+        rendered_text = self.text.format_map(
+            rendering_context.data,
+        )
+        return RenderingResult(
+            items=[Text(text=rendered_text, entities=None)]
+        )
+
+
+class Group(Renderer):
+    def __init__(self, *widgets):
+        self.widgets = widgets
+
+    def register(self, router: Router) -> None:
+        for widget in self.widgets:
+            widget.register(router)
+
+    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+        items = []
+        for widget in self.widgets:
+            items.extend(widget.render(rendering_context).items)
+        return RenderingResult(items)
