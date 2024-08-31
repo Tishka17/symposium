@@ -32,7 +32,7 @@ class Handler(Protocol):
         raise NotImplementedError
 
 
-class HandlingWidget(Handler, Protocol):
+class HandlerHolder(Protocol):
     @abstractmethod
     def register(self, router: Router) -> None:
         raise NotImplementedError

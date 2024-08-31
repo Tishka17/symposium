@@ -3,11 +3,13 @@ from typing import Any
 
 from aiogram import Router as AiogramRouter, Bot
 from aiogram.dispatcher.event.bases import UNHANDLED
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity, TelegramObject, \
-    Message
+from aiogram.types import (
+    InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity, TelegramObject,
+    Message,
+)
 
 from symposium.events import Click, SimposiumEvent
-from symposium.handle import EventContext, Router, Filter, Handler
+from symposium.handle import EventContext, Router, HandlerHolder
 from symposium.render import KeyboardButton, Text, Renderer, RenderingContext
 from symposium.render import RenderingResult, Keyboard
 from symposium.router import SimpleRouter
@@ -76,17 +78,11 @@ def aiogram_event(context: EventContext) -> TelegramObject | None:
         event = event.parent_event
 
 
-class AiogramRouterAdapter(AiogramRouter, Router):
+class AiogramRouterAdapter(AiogramRouter):
 
-    def __init__(self):
+    def __init__(self, router: Router):
         super().__init__()
-        self.router = SimpleRouter()
-
-    def add_handler(self, filter: Filter, handler: Handler) -> None:
-        self.router.add_handler(filter, handler)
-
-    def prepare_handlers(self, event: EventContext) -> "Handler | None":
-        return self.router.prepare_handlers(event)
+        self.router = router
 
     def resolve_used_update_types(self, skip_events: set[str] | None = None) -> list[str]:
         return ["callback"]
@@ -102,10 +98,19 @@ class AiogramRouterAdapter(AiogramRouter, Router):
             ),
             router=self.router,
         )
-        handler = self.prepare_handlers(click)
+        handler = self.router.prepare_handlers(click)
         if not handler:
             return UNHANDLED
         await handler.handle(click)
+
+
+def register_handler(widget: HandlerHolder, router: AiogramRouter) -> Router:
+    symposium_router = SimpleRouter()
+    widget.register(symposium_router)
+
+    adapter = AiogramRouterAdapter(symposium_router)
+    router.include_router(adapter)
+    return symposium_router
 
 
 class MessageManager:

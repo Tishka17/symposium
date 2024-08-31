@@ -3,7 +3,7 @@ import os
 
 from aiogram import Bot, Dispatcher
 
-from symposium.aiogram import AiogramRouterAdapter, render_aiogram, aiogram_event, MessageManager
+from symposium.aiogram import render_aiogram, aiogram_event, MessageManager, register_handler
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
 from symposium.render import RenderingContext
@@ -35,11 +35,8 @@ async def main():
     bot = Bot(token=os.getenv("BOT_TOKEN"))
     message_manager = MessageManager(bot)
     dp = Dispatcher()
-    router = AiogramRouterAdapter()
-    window.register(router)
+    router = register_handler(window, dp)
     router.add_handler(filter_widget_click, on_any_widget_click)
-
-    dp.include_router(router)
 
     rendered = render_aiogram(
         window,

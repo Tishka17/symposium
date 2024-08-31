@@ -1,11 +1,11 @@
 from collections.abc import Callable
 
 from symposium.events import Click, WidgetClick
-from symposium.handle import Router, EventContext, HandlingWidget, FunctionalHandler, emit
+from symposium.handle import Router, EventContext, HandlerHolder, FunctionalHandler, emit, Handler
 from symposium.render import Renderer, RenderingContext, RenderingResult, Keyboard, KeyboardButton, Text
 
 
-class Button(HandlingWidget, Renderer):
+class Button(HandlerHolder, Handler, Renderer):
     def __init__(self, id: str, on_click: Callable):
         self.id = id
         self.on_click = on_click
@@ -51,7 +51,7 @@ class Button(HandlingWidget, Renderer):
         )
 
 
-class Format(Renderer):
+class Format(Renderer, HandlerHolder):
     def __init__(self, text: str):
         self.text = text
 
@@ -67,7 +67,8 @@ class Format(Renderer):
         )
 
 
-class Group(Renderer):
+class Group(Renderer, HandlerHolder):
+
     def __init__(self, *widgets):
         self.widgets = widgets
 
