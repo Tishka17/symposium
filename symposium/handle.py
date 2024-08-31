@@ -22,7 +22,7 @@ class Router(Protocol):
 
 class Handler(Protocol):
     @abstractmethod
-    def handle(self, context: EventContext) -> bool:
+    async def handle(self, context: EventContext) -> bool:
         raise NotImplementedError
 
 

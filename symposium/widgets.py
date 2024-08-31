@@ -7,8 +7,9 @@ class Button(HandlingWidget, Renderer):
     def __init__(self, id: str):
         self.id = id
 
-    def handle(self, context: EventContext) -> bool:
+    async def handle(self, context: EventContext) -> bool:
         print("Click detected")
+        await context.event.parent_event.answer("Click detected")
         return False
 
     def register(self, router: Router) -> None:

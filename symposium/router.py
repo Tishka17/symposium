@@ -13,9 +13,9 @@ class MetaHandler(Handler):
     def __init__(self, handlers: list[Handler]) -> None:
         self.handlers = handlers
 
-    def handle(self, event: EventContext) -> bool:
+    async def handle(self, event: EventContext) -> bool:
         for handler in self.handlers:
-            handler.handle(event)
+            await handler.handle(event)
         return True
 
 
