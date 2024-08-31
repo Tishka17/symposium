@@ -1,9 +1,14 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
-from aiogram import Router as AiogramRouter
+from typing import Any
 
-from symposium.handle import Router
+from aiogram import Router as AiogramRouter
+from aiogram.dispatcher.event.bases import UNHANDLED
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, TelegramObject, CallbackQuery
+
+from symposium.events import Click
+from symposium.handle import EventContext
 from symposium.render import KeyboardButton
 from symposium.render import RenderingResult, Keyboard
+from symposium.router import SimpleRouter
 
 
 def _to_inline_button(button: KeyboardButton) -> InlineKeyboardButton:
@@ -39,5 +44,22 @@ def to_inline_keyboard(data: RenderingResult) -> None | InlineKeyboardMarkup:
 class AiogramRouterAdapter(AiogramRouter):
     def __init__(self):
         super().__init__()
-        self.router = Router()
+        self.router = SimpleRouter()
 
+    def resolve_used_update_types(self, skip_events: set[str] | None = None) -> list[str]:
+        return ["callback"]
+
+    async def propagate_event(self, update_type: str, event: TelegramObject, **kwargs: Any) -> Any:
+        if not isinstance(event, CallbackQuery):
+            return UNHANDLED
+
+        click = EventContext(
+            event=Click(
+                data=event.data,
+                parent_event=event,
+            )
+        )
+        handler = self.router.prepare_handlers(click)
+        if not handler:
+            return UNHANDLED
+        handler.handle(click)
