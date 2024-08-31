@@ -25,6 +25,8 @@ class Handler(Protocol):
     def handle(self, context: EventContext) -> bool:
         raise NotImplementedError
 
+
+class HandlingWidget(Handler, Protocol):
     @abstractmethod
     def register(self, router: Router) -> None:
         raise NotImplementedError

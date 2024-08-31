@@ -1,9 +1,9 @@
 from symposium.events import Click
-from symposium.handle import Handler, Router, EventContext
+from symposium.handle import Router, EventContext, HandlingWidget
 from symposium.render import Renderer, RenderingContext, RenderingResult, Keyboard, KeyboardButton
 
 
-class Button(Handler, Renderer):
+class Button(HandlingWidget, Renderer):
     def __init__(self, id: str):
         self.id = id
 

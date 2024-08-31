@@ -1,5 +1,5 @@
 from abc import abstractmethod
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 from typing import Any, Protocol
 
 
@@ -32,8 +32,8 @@ class RenderingResult:
 
 @dataclass
 class RenderingContext:
-    data: dict
-    cache: dict
+    data: dict = field(default_factory=dict)
+    cache: dict = field(default_factory=dict)
 
 
 class Renderer(Protocol):
