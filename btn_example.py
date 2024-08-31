@@ -4,7 +4,8 @@ import os
 from aiogram import Bot, Dispatcher
 
 from symposium.aiogram import AiogramRouterAdapter, render_aiogram, aiogram_event
-from symposium.handle import EventContext
+from symposium.events import WidgetClick
+from symposium.handle import EventContext, FunctionalHandler
 from symposium.render import RenderingContext
 from symposium.widgets import Button, Group, Format
 
@@ -13,6 +14,15 @@ async def on_click(context: EventContext):
     print("Click detected")
     callback = aiogram_event(context)
     await callback.answer("Click detected")
+
+
+def filter_widget_click(context: EventContext):
+    return isinstance(context.event, WidgetClick)
+
+
+@FunctionalHandler
+async def on_any_widget_click(context: EventContext):
+    print("Any click")
 
 
 window = Group(
@@ -26,6 +36,7 @@ async def main():
     dp = Dispatcher()
     router = AiogramRouterAdapter()
     window.register(router)
+    router.add_handler(filter_widget_click, on_any_widget_click)
 
     dp.include_router(router)
 
