@@ -5,7 +5,7 @@ from aiogram import Router as AiogramRouter
 from aiogram.dispatcher.event.bases import UNHANDLED
 from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity, TelegramObject
 
-from symposium.events import Click
+from symposium.events import Click, SimposiumEvent
 from symposium.handle import EventContext, Router, Filter, Handler
 from symposium.render import KeyboardButton, Text, Renderer, RenderingContext
 from symposium.render import RenderingResult, Keyboard
@@ -60,8 +60,19 @@ def to_aiogram(data: RenderingResult) -> AiogramRenderingResult:
                 raise ValueError(f'Unexpected item: {item}')
     return res
 
+
 def render_aiogram(widget: Renderer, context: RenderingContext) -> AiogramRenderingResult:
     return to_aiogram(widget.render(context))
+
+
+def aiogram_event(context: EventContext) -> TelegramObject | None:
+    event = context.event
+    while True:
+        if isinstance(event, TelegramObject):
+            return event
+        if not isinstance(event, SimposiumEvent):
+            return None
+        event = event.parent_event
 
 
 class AiogramRouterAdapter(AiogramRouter, Router):
@@ -72,6 +83,9 @@ class AiogramRouterAdapter(AiogramRouter, Router):
 
     def add_handler(self, filter: Filter, handler: Handler) -> None:
         self.router.add_handler(filter, handler)
+
+    def prepare_handlers(self, event: EventContext) -> "Handler | None":
+        return self.router.prepare_handlers(event)
 
     def resolve_used_update_types(self, skip_events: set[str] | None = None) -> list[str]:
         return ["callback"]
@@ -84,9 +98,10 @@ class AiogramRouterAdapter(AiogramRouter, Router):
             event=Click(
                 data=event.data,
                 parent_event=event,
-            )
+            ),
+            router=self.router,
         )
-        handler = self.router.prepare_handlers(click)
+        handler = self.prepare_handlers(click)
         if not handler:
             return UNHANDLED
         await handler.handle(click)

@@ -3,13 +3,21 @@ import os
 
 from aiogram import Bot, Dispatcher
 
-from symposium.aiogram import AiogramRouterAdapter, render_aiogram
+from symposium.aiogram import AiogramRouterAdapter, render_aiogram, aiogram_event
+from symposium.handle import EventContext
 from symposium.render import RenderingContext
 from symposium.widgets import Button, Group, Format
 
+
+async def on_click(context: EventContext):
+    print("Click detected")
+    callback = aiogram_event(context)
+    await callback.answer("Click detected")
+
+
 window = Group(
     Format("Hello, {name}"),
-    Button(id="x"),
+    Button(id="x", on_click=on_click),
 )
 
 

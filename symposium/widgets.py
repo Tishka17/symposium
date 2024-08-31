@@ -1,19 +1,39 @@
-from symposium.events import Click
-from symposium.handle import Router, EventContext, HandlingWidget
+from collections.abc import Callable
+
+from symposium.events import Click, WidgetClick
+from symposium.handle import Router, EventContext, HandlingWidget, FunctionalHandler, emit
 from symposium.render import Renderer, RenderingContext, RenderingResult, Keyboard, KeyboardButton, Text
 
 
 class Button(HandlingWidget, Renderer):
-    def __init__(self, id: str):
+    def __init__(self, id: str, on_click: Callable):
         self.id = id
+        self.on_click = on_click
 
     async def handle(self, context: EventContext) -> bool:
-        print("Click detected")
-        await context.event.parent_event.answer("Click detected")
+        await emit(
+            context=EventContext(
+                event=WidgetClick(
+                    data=None,
+                    source=self,
+                    parent_event=context.event,
+                ),
+                router=context.router,
+            )
+        )
         return False
 
     def register(self, router: Router) -> None:
         router.add_handler(self._filter, self)
+        router.add_handler(
+            self._filter_click,
+            FunctionalHandler(self.on_click),
+        )
+
+    def _filter_click(self, context: EventContext) -> bool:
+        if not isinstance(context.event, WidgetClick):
+            return False
+        return context.event.source is self
 
     def _filter(self, context: EventContext) -> bool:
         if not isinstance(context.event, Click):
