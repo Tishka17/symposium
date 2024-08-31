@@ -3,7 +3,7 @@ import os
 
 from aiogram import Bot, Dispatcher
 
-from symposium.aiogram import AiogramRouterAdapter, render_aiogram, aiogram_event
+from symposium.aiogram import AiogramRouterAdapter, render_aiogram, aiogram_event, MessageManager
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
 from symposium.render import RenderingContext
@@ -33,6 +33,7 @@ window = Group(
 
 async def main():
     bot = Bot(token=os.getenv("BOT_TOKEN"))
+    message_manager = MessageManager(bot)
     dp = Dispatcher()
     router = AiogramRouterAdapter()
     window.register(router)
@@ -47,11 +48,9 @@ async def main():
         ),
     )
 
-    await bot.send_message(
+    await message_manager.send(
         chat_id=1,
-        text=rendered.text,
-        reply_markup=rendered.reply_markup,
-        disable_web_page_preview=True,
+        data=rendered,
     )
     await dp.start_polling(bot)
 

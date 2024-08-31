@@ -1,9 +1,10 @@
 from dataclasses import dataclass
 from typing import Any
 
-from aiogram import Router as AiogramRouter
+from aiogram import Router as AiogramRouter, Bot
 from aiogram.dispatcher.event.bases import UNHANDLED
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity, TelegramObject
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity, TelegramObject, \
+    Message
 
 from symposium.events import Click, SimposiumEvent
 from symposium.handle import EventContext, Router, Filter, Handler
@@ -105,3 +106,19 @@ class AiogramRouterAdapter(AiogramRouter, Router):
         if not handler:
             return UNHANDLED
         await handler.handle(click)
+
+
+class MessageManager:
+    def __init__(self, bot: Bot):
+        self.bot = bot
+
+    async def send(
+            self, chat_id: int, data: AiogramRenderingResult,
+            **kwargs,
+    ) -> Message:
+        return await self.bot.send_message(
+            chat_id=chat_id,
+            text=data.text,
+            reply_markup=data.reply_markup,
+            **kwargs,
+        )
