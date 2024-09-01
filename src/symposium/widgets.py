@@ -1,4 +1,6 @@
 from collections.abc import Callable
+from dataclasses import replace
+from typing import Any
 
 from symposium.core import (
     Renderer,
@@ -8,29 +10,54 @@ from symposium.core import (
     Handler,
     EventContext,
 )
+from symposium.core.finder import Finder
 from symposium.events import Click, WidgetClick
-from symposium.handle import HandlerHolder, FunctionalHandler, emit
+from symposium.handle import HandlerHolder, FunctionalHandler
 from symposium.render import Keyboard, KeyboardButton, Text, extract_text
 
 
-class Button(HandlerHolder, Handler, Renderer):
-    def __init__(self, id: str, text: Renderer, on_click: Callable):
+class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
+    def __init__(self, id: str | None = None):
         self.id = id
+
+    def find(self, widget_id: str) -> Any:
+        if widget_id == self.id:
+            return self
+        return None
+
+    async def _emit(self, old_context: EventContext, event: Any) -> None:
+        context = replace(old_context, event=event)
+        handler = context.router.prepare_handlers(context)
+        await handler.handle(context)
+
+    async def handle(self, context: EventContext) -> None:
+        pass
+
+    def register(self, router: Router) -> None:
+        pass
+
+    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+        return RenderingResult([])
+
+    def _rendered_single(self, item: Any) -> RenderingResult:
+        return RenderingResult(items=[item])
+
+
+class Button(BaseWidget):
+    def __init__(self, id: str, text: Renderer, on_click: Callable):
+        super().__init__(id)
         self.on_click = on_click
         self.text = text
 
-    async def handle(self, context: EventContext) -> bool:
-        await emit(
-            context=EventContext(
-                event=WidgetClick(
-                    data=None,
-                    source=self,
-                    parent_event=context.event,
-                ),
-                router=context.router,
-            )
+    async def handle(self, context: EventContext) -> None:
+        await self._emit(
+            context,
+            WidgetClick(
+                data=None,
+                source=self,
+                parent_event=context.event,
+            ),
         )
-        return False
 
     def register(self, router: Router) -> None:
         router.add_handler(self._filter, self)
@@ -54,11 +81,12 @@ class Button(HandlerHolder, Handler, Renderer):
             text=extract_text(self.text.render(rendering_context)),
             data=self.id,
         )
-        return RenderingResult(items=[Keyboard([[btn]])])
+        return self._rendered_single(Keyboard([[btn]]))
 
 
-class Format(Renderer, HandlerHolder):
-    def __init__(self, text: str):
+class Format(BaseWidget):
+    def __init__(self, text: str, id: str | None = None):
+        super().__init__(id)
         self.text = text
 
     def register(self, router: Router) -> None:
@@ -68,18 +96,27 @@ class Format(Renderer, HandlerHolder):
         rendered_text = self.text.format_map(
             rendering_context.data,
         )
-        return RenderingResult(items=[Text(text=rendered_text, entities=None)])
+        return self._rendered_single(Text(text=rendered_text, entities=None))
 
 
-class Group(Renderer, HandlerHolder):
-    def __init__(self, *widgets):
+class Group(BaseWidget):
+    def __init__(self, *widgets, id: str | None = None):
+        super().__init__(id)
         self.widgets = widgets
 
     def register(self, router: Router) -> None:
         for widget in self.widgets:
             widget.register(router)
 
+    def find(self, widget_id: str) -> Any:
+        for widget in self.widgets:
+            if found := widget.find(widget_id):
+                return found
+        return super().find(widget_id)
+
     def render(self, rendering_context: RenderingContext) -> RenderingResult:
+        if rendering_context.ui_root is None:
+            rendering_context = replace(rendering_context, ui_root=self)
         items = []
         for widget in self.widgets:
             items.extend(widget.render(rendering_context).items)

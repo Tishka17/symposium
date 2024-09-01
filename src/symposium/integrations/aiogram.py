@@ -13,6 +13,7 @@ from aiogram.types import (
 )
 
 from symposium.core import RenderingResult, Renderer, RenderingContext
+from symposium.core.finder import Finder
 from symposium.events import Click, SymposiumEvent
 from symposium.handle import EventContext, Router, HandlerHolder
 from symposium.render import KeyboardButton, Keyboard, Text
@@ -85,9 +86,14 @@ def aiogram_event(context: EventContext) -> TelegramObject | None:
 
 
 class AiogramRouterAdapter(AiogramRouter):
-    def __init__(self, router: Router):
+    def __init__(
+        self,
+        router: Router,
+        ui_root: Finder,
+    ):
         super().__init__()
         self.router = router
+        self.ui_root = ui_root
 
     def resolve_used_update_types(
         self, skip_events: set[str] | None = None
@@ -106,6 +112,7 @@ class AiogramRouterAdapter(AiogramRouter):
                 parent_event=event,
             ),
             router=self.router,
+            ui_root=self.ui_root,
         )
         handler = self.router.prepare_handlers(click)
         if not handler:
@@ -117,7 +124,7 @@ def register_handler(widget: HandlerHolder, router: AiogramRouter) -> Router:
     symposium_router = SimpleRouter()
     widget.register(symposium_router)
 
-    adapter = AiogramRouterAdapter(symposium_router)
+    adapter = AiogramRouterAdapter(symposium_router, widget)
     router.include_router(adapter)
     return symposium_router
 

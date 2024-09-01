@@ -83,9 +83,14 @@ def telebot_event(context: EventContext) -> CallbackQuery | None:
 
 
 class TelebotAdapter:
-    def __init__(self, router: Router):
+    def __init__(
+        self,
+        router: Router,
+        ui_root: Finder,
+    ):
         super().__init__()
         self.router = router
+        self.ui_root = ui_root
 
     def filter_callback(
         self,
@@ -99,6 +104,7 @@ class TelebotAdapter:
                         parent_event=event,
                     ),
                     router=self.router,
+                    ui_root=self.ui_root,
                 )
             )
         )

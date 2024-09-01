@@ -14,10 +14,9 @@ class MetaHandler(Handler):
     def __init__(self, handlers: list[Handler]) -> None:
         self.handlers = handlers
 
-    async def handle(self, event: EventContext) -> bool:
+    async def handle(self, event: EventContext) -> None:
         for handler in self.handlers:
             await handler.handle(event)
-        return True
 
 
 class FunctionalHandler(Handler):
@@ -28,8 +27,3 @@ class FunctionalHandler(Handler):
 
     async def handle(self, context: EventContext) -> bool:
         return await self.callback(context)
-
-
-async def emit(context: EventContext) -> None:
-    handler = context.router.prepare_handlers(context)
-    await handler.handle(context)
