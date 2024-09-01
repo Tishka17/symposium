@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from symposium.core import Filter, EventContext, Handler
+from symposium.core import EventContext, Filter, Handler
 from .handle import MetaHandler
 
 

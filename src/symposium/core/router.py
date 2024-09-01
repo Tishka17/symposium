@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass
-from typing import Protocol, Any
+from typing import Any, Protocol
 
 from .finder import Finder
 

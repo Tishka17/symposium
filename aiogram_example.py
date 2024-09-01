@@ -3,11 +3,16 @@ import os
 
 from aiogram import Bot, Dispatcher
 
-from symposium.integrations.aiogram import render_aiogram, aiogram_event, MessageManager, register_handler
+from symposium.core import RenderingContext
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
-from symposium.core import RenderingContext
-from symposium.widgets import Button, Group, Format
+from symposium.integrations.aiogram import render_aiogram, aiogram_event, MessageManager, register_handler
+from symposium.widgets import Button, Format
+from symposium.windows.window import GetterGroup
+
+
+async def getter(context: RenderingContext) -> dict:
+    return {"name": "Tishka17"}
 
 
 async def on_click(context: EventContext):
@@ -25,13 +30,14 @@ async def on_any_widget_click(context: EventContext):
     print("Any click")
 
 
-window = Group(
+window = GetterGroup(
     Format("Hello, {name}"),
     Button(
         text=Format("Click me!"),
         id="x",
         on_click=on_click,
     ),
+    getter=getter,
 )
 
 
@@ -42,12 +48,7 @@ async def main():
     router = register_handler(window, dp)
     router.add_handler(filter_widget_click, on_any_widget_click)
 
-    rendered = render_aiogram(
-        window,
-        RenderingContext(
-            data={"name": "Tishka17"}
-        ),
-    )
+    rendered = await render_aiogram(window)
 
     await message_manager.send(
         chat_id=1,

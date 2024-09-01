@@ -8,8 +8,10 @@ __all__ = [
     "RenderingContext",
     "RenderedItem",
     "Renderer",
+    "Finder",
 ]
 
 from .events import SymposiumEvent
-from .render import RenderingResult, RenderingContext, RenderedItem, Renderer
-from .router import Handler, Router, EventContext, Filter
+from .finder import Finder
+from .render import RenderedItem, Renderer, RenderingContext, RenderingResult
+from .router import EventContext, Filter, Handler, Router

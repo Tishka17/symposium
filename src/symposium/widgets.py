@@ -3,16 +3,16 @@ from dataclasses import replace
 from typing import Any
 
 from symposium.core import (
+    EventContext,
+    Handler,
     Renderer,
     RenderingContext,
     RenderingResult,
     Router,
-    Handler,
-    EventContext,
 )
 from symposium.core.finder import Finder
 from symposium.events import Click, WidgetClick
-from symposium.handle import HandlerHolder, FunctionalHandler
+from symposium.handle import FunctionalHandler, HandlerHolder
 from symposium.render import Keyboard, KeyboardButton, Text, extract_text
 
 
@@ -36,7 +36,10 @@ class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
     def register(self, router: Router) -> None:
         pass
 
-    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+    async def render(
+        self,
+        rendering_context: RenderingContext,
+    ) -> RenderingResult:
         return RenderingResult([])
 
     def _rendered_single(self, item: Any) -> RenderingResult:
@@ -76,9 +79,12 @@ class Button(BaseWidget):
             return False
         return context.event.data == self.id
 
-    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+    async def render(
+        self,
+        rendering_context: RenderingContext,
+    ) -> RenderingResult:
         btn = KeyboardButton(
-            text=extract_text(self.text.render(rendering_context)),
+            text=extract_text(await self.text.render(rendering_context)),
             data=self.id,
         )
         return self._rendered_single(Keyboard([[btn]]))
@@ -92,7 +98,10 @@ class Format(BaseWidget):
     def register(self, router: Router) -> None:
         pass
 
-    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+    async def render(
+        self,
+        rendering_context: RenderingContext,
+    ) -> RenderingResult:
         rendered_text = self.text.format_map(
             rendering_context.data,
         )
@@ -114,10 +123,14 @@ class Group(BaseWidget):
                 return found
         return super().find(widget_id)
 
-    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+    async def render(
+        self,
+        rendering_context: RenderingContext,
+    ) -> RenderingResult:
         if rendering_context.ui_root is None:
             rendering_context = replace(rendering_context, ui_root=self)
         items = []
         for widget in self.widgets:
-            items.extend(widget.render(rendering_context).items)
+            widget_result = await widget.render(rendering_context)
+            items.extend(widget_result.items)
         return RenderingResult(items)

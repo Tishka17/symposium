@@ -1,22 +1,22 @@
 from dataclasses import dataclass
 from typing import Any
 
-from aiogram import Router as AiogramRouter, Bot
+from aiogram import Bot
+from aiogram import Router as AiogramRouter
 from aiogram.dispatcher.event.bases import UNHANDLED
 from aiogram.types import (
+    CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    CallbackQuery,
+    Message,
     MessageEntity,
     TelegramObject,
-    Message,
 )
 
-from symposium.core import RenderingResult, Renderer, RenderingContext
-from symposium.core.finder import Finder
+from symposium.core import Finder, Renderer, RenderingContext, RenderingResult
 from symposium.events import Click, SymposiumEvent
-from symposium.handle import EventContext, Router, HandlerHolder
-from symposium.render import KeyboardButton, Keyboard, Text
+from symposium.handle import EventContext, HandlerHolder, Router
+from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
 
 
@@ -69,10 +69,13 @@ def to_aiogram(data: RenderingResult) -> AiogramRenderingResult:
     return res
 
 
-def render_aiogram(
-    widget: Renderer, context: RenderingContext
+async def render_aiogram(
+    widget: Renderer,
+    context: RenderingContext | None = None,
 ) -> AiogramRenderingResult:
-    return to_aiogram(widget.render(context))
+    if context is None:
+        context = RenderingContext()
+    return to_aiogram(await widget.render(context))
 
 
 def aiogram_event(context: EventContext) -> TelegramObject | None:
@@ -96,12 +99,16 @@ class AiogramRouterAdapter(AiogramRouter):
         self.ui_root = ui_root
 
     def resolve_used_update_types(
-        self, skip_events: set[str] | None = None
+        self,
+        skip_events: set[str] | None = None,
     ) -> list[str]:
         return ["callback"]
 
     async def propagate_event(
-        self, update_type: str, event: TelegramObject, **kwargs: Any
+        self,
+        update_type: str,
+        event: TelegramObject,
+        **kwargs: Any,
     ) -> Any:
         if not isinstance(event, CallbackQuery):
             return UNHANDLED

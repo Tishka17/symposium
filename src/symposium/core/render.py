@@ -24,5 +24,8 @@ class RenderingContext:
 
 class Renderer(Protocol):
     @abstractmethod
-    def render(self, rendering_context: RenderingContext) -> RenderingResult:
+    async def render(
+        self,
+        rendering_context: RenderingContext,
+    ) -> RenderingResult:
         raise NotImplementedError

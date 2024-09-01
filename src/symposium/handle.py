@@ -1,7 +1,8 @@
 from abc import abstractmethod
-from typing import Protocol, Callable, Awaitable
+from collections.abc import Awaitable, Callable
+from typing import Protocol
 
-from symposium.core import Handler, Router, EventContext
+from symposium.core import EventContext, Handler, Router
 
 
 class HandlerHolder(Protocol):
@@ -21,7 +22,8 @@ class MetaHandler(Handler):
 
 class FunctionalHandler(Handler):
     def __init__(
-        self, callback: Callable[[EventContext], Awaitable[bool]]
+        self,
+        callback: Callable[[EventContext], Awaitable[bool]],
     ) -> None:
         self.callback = callback
 

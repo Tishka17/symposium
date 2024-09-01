@@ -3,17 +3,17 @@ from typing import Any
 
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import (
+    CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
-    CallbackQuery,
-    MessageEntity,
     Message,
+    MessageEntity,
 )
 
-from symposium.core import RenderingResult, Renderer, RenderingContext
+from symposium.core import Finder, Renderer, RenderingContext, RenderingResult
 from symposium.events import Click, SymposiumEvent
-from symposium.handle import EventContext, Router, HandlerHolder
-from symposium.render import KeyboardButton, Text, Keyboard
+from symposium.handle import EventContext, HandlerHolder, Router
+from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
 
 
@@ -66,10 +66,13 @@ def to_telebot(data: RenderingResult) -> TelebotRenderingResult:
     return res
 
 
-def render_telebot(
-    widget: Renderer, context: RenderingContext
+async def render_telebot(
+    widget: Renderer,
+    context: RenderingContext | None = None,
 ) -> TelebotRenderingResult:
-    return to_telebot(widget.render(context))
+    if context is None:
+        context = RenderingContext()
+    return to_telebot(await widget.render(context))
 
 
 def telebot_event(context: EventContext) -> CallbackQuery | None:
@@ -105,12 +108,14 @@ class TelebotAdapter:
                     ),
                     router=self.router,
                     ui_root=self.ui_root,
-                )
-            )
+                ),
+            ),
         )
 
     async def handle_callback(
-        self, event: CallbackQuery, **kwargs: Any
+        self,
+        event: CallbackQuery,
+        **kwargs: Any,
     ) -> Any:
         click = EventContext(
             event=Click(
@@ -118,6 +123,7 @@ class TelebotAdapter:
                 parent_event=event,
             ),
             router=self.router,
+            ui_root=self.ui_root,
         )
         handler = self.router.prepare_handlers(click)
         await handler.handle(click)
@@ -127,9 +133,10 @@ def register_handler(widget: HandlerHolder, bot: AsyncTeleBot) -> Router:
     symposium_router = SimpleRouter()
     widget.register(symposium_router)
 
-    adapter = TelebotAdapter(symposium_router)
+    adapter = TelebotAdapter(symposium_router, widget)
     bot.register_callback_query_handler(
-        adapter.handle_callback, adapter.filter_callback
+        adapter.handle_callback,
+        adapter.filter_callback,
     )
     return symposium_router
 
