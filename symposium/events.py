@@ -1,18 +1,15 @@
 from dataclasses import dataclass
 from typing import Any
 
-
-@dataclass
-class SimposiumEvent:
-    parent_event: Any
+from symposium.core import SymposiumEvent
 
 
 @dataclass
-class Click(SimposiumEvent):
+class Click(SymposiumEvent):
     data: str
 
 
 @dataclass
-class WidgetClick(SimposiumEvent):
+class WidgetClick(SymposiumEvent):
     data: Any
     source: Any

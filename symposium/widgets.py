@@ -1,8 +1,16 @@
 from collections.abc import Callable
 
+from symposium.core import (
+    Renderer,
+    RenderingContext,
+    RenderingResult,
+    Router,
+    Handler,
+    EventContext,
+)
 from symposium.events import Click, WidgetClick
-from symposium.handle import Router, EventContext, HandlerHolder, FunctionalHandler, emit, Handler
-from symposium.render import Renderer, RenderingContext, RenderingResult, Keyboard, KeyboardButton, Text
+from symposium.handle import HandlerHolder, FunctionalHandler, emit
+from symposium.render import Keyboard, KeyboardButton, Text
 
 
 class Button(HandlerHolder, Handler, Renderer):
@@ -43,10 +51,16 @@ class Button(HandlerHolder, Handler, Renderer):
     def render(self, rendering_context: RenderingContext) -> RenderingResult:
         return RenderingResult(
             items=[
-                Keyboard([[KeyboardButton(
-                    text="text",
-                    data=self.id,
-                )]]),
+                Keyboard(
+                    [
+                        [
+                            KeyboardButton(
+                                text="text",
+                                data=self.id,
+                            )
+                        ]
+                    ]
+                ),
             ]
         )
 
@@ -62,13 +76,10 @@ class Format(Renderer, HandlerHolder):
         rendered_text = self.text.format_map(
             rendering_context.data,
         )
-        return RenderingResult(
-            items=[Text(text=rendered_text, entities=None)]
-        )
+        return RenderingResult(items=[Text(text=rendered_text, entities=None)])
 
 
 class Group(Renderer, HandlerHolder):
-
     def __init__(self, *widgets):
         self.widgets = widgets
 

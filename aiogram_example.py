@@ -3,10 +3,10 @@ import os
 
 from aiogram import Bot, Dispatcher
 
-from symposium.aiogram import render_aiogram, aiogram_event, MessageManager, register_handler
+from symposium.integrations.aiogram import render_aiogram, aiogram_event, MessageManager, register_handler
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
-from symposium.render import RenderingContext
+from symposium.core import RenderingContext
 from symposium.widgets import Button, Group, Format
 
 

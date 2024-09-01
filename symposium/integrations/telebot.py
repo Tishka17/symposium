@@ -1,22 +1,21 @@
 from dataclasses import dataclass
 from typing import Any
 
-from aiogram import Router as AiogramRouter, Bot
-from aiogram.dispatcher.event.bases import UNHANDLED
-from aiogram.types import (
-    InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity, TelegramObject,
+from telebot.async_telebot import AsyncTeleBot
+from telebot.types import (
+    InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity,
     Message,
 )
 
-from symposium.events import Click, SimposiumEvent
+from symposium.core import RenderingResult, Renderer, RenderingContext
+from symposium.events import Click, SymposiumEvent
 from symposium.handle import EventContext, Router, HandlerHolder
-from symposium.render import KeyboardButton, Text, Renderer, RenderingContext
-from symposium.render import RenderingResult, Keyboard
+from symposium.render import KeyboardButton, Text, Keyboard
 from symposium.router import SimpleRouter
 
 
 @dataclass
-class AiogramRenderingResult:
+class TelebotRenderingResult:
     text: str
     entities: list[MessageEntity] | None
     reply_markup: InlineKeyboardMarkup
@@ -29,7 +28,7 @@ def _to_inline_button(button: KeyboardButton) -> InlineKeyboardButton:
     )
 
 
-def _append_keyboard(item: Keyboard, target: AiogramRenderingResult) -> None:
+def _append_keyboard(item: Keyboard, target: TelebotRenderingResult) -> None:
     for row in item.buttons:
         new_row = []
         for button in row:
@@ -40,17 +39,17 @@ def _append_keyboard(item: Keyboard, target: AiogramRenderingResult) -> None:
             else:
                 raise ValueError(f'Unexpected button: {button}')
         if new_row:
-            target.reply_markup.inline_keyboard.append(new_row)
+            target.reply_markup.keyboard.append(new_row)
 
 
-def _append_text(item: Text, target: AiogramRenderingResult) -> None:
+def _append_text(item: Text, target: TelebotRenderingResult) -> None:
     target.text += item.text
 
 
-def to_aiogram(data: RenderingResult) -> AiogramRenderingResult:
-    res = AiogramRenderingResult(
+def to_telebot(data: RenderingResult) -> TelebotRenderingResult:
+    res = TelebotRenderingResult(
         text="",
-        reply_markup=InlineKeyboardMarkup(inline_keyboard=[]),
+        reply_markup=InlineKeyboardMarkup(keyboard=[]),
         entities=[],
     )
     for item in data.items:
@@ -64,33 +63,38 @@ def to_aiogram(data: RenderingResult) -> AiogramRenderingResult:
     return res
 
 
-def render_aiogram(widget: Renderer, context: RenderingContext) -> AiogramRenderingResult:
-    return to_aiogram(widget.render(context))
+def render_telebot(widget: Renderer, context: RenderingContext) -> TelebotRenderingResult:
+    return to_telebot(widget.render(context))
 
 
-def aiogram_event(context: EventContext) -> TelegramObject | None:
+def telebot_event(context: EventContext) -> CallbackQuery | None:
     event = context.event
     while True:
-        if isinstance(event, TelegramObject):
+        if isinstance(event, CallbackQuery):
             return event
-        if not isinstance(event, SimposiumEvent):
+        if not isinstance(event, SymposiumEvent):
             return None
         event = event.parent_event
 
 
-class AiogramRouterAdapter(AiogramRouter):
+class TelebotAdapter:
 
     def __init__(self, router: Router):
         super().__init__()
         self.router = router
 
-    def resolve_used_update_types(self, skip_events: set[str] | None = None) -> list[str]:
-        return ["callback"]
+    def filter_callback(self, event: CallbackQuery, ):
+        return bool(
+            self.router.prepare_handlers(EventContext(
+                event=Click(
+                    data=event.data,
+                    parent_event=event,
+                ),
+                router=self.router,
+            ))
+        )
 
-    async def propagate_event(self, update_type: str, event: TelegramObject, **kwargs: Any) -> Any:
-        if not isinstance(event, CallbackQuery):
-            return UNHANDLED
-
+    async def handle_callback(self, event: CallbackQuery, **kwargs: Any) -> Any:
         click = EventContext(
             event=Click(
                 data=event.data,
@@ -99,26 +103,27 @@ class AiogramRouterAdapter(AiogramRouter):
             router=self.router,
         )
         handler = self.router.prepare_handlers(click)
-        if not handler:
-            return UNHANDLED
         await handler.handle(click)
 
 
-def register_handler(widget: HandlerHolder, router: AiogramRouter) -> Router:
+def register_handler(widget: HandlerHolder, bot: AsyncTeleBot) -> Router:
     symposium_router = SimpleRouter()
     widget.register(symposium_router)
 
-    adapter = AiogramRouterAdapter(symposium_router)
-    router.include_router(adapter)
+    adapter = TelebotAdapter(symposium_router)
+    bot.register_callback_query_handler(
+        adapter.handle_callback,
+        adapter.filter_callback
+    )
     return symposium_router
 
 
 class MessageManager:
-    def __init__(self, bot: Bot):
+    def __init__(self, bot: AsyncTeleBot):
         self.bot = bot
 
     async def send(
-            self, chat_id: int, data: AiogramRenderingResult,
+            self, chat_id: int, data: TelebotRenderingResult,
             **kwargs,
     ) -> Message:
         return await self.bot.send_message(

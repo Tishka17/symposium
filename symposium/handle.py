@@ -1,35 +1,7 @@
 from abc import abstractmethod
-from dataclasses import dataclass
-from typing import Any, Protocol, Callable, Awaitable
+from typing import Protocol, Callable, Awaitable
 
-
-
-@dataclass
-class EventContext:
-    event: Any
-    router: "Router"
-
-
-class Filter(Protocol):
-    @abstractmethod
-    def __call__(self, context: EventContext) -> bool:
-        raise NotImplementedError
-
-
-class Router(Protocol):
-    @abstractmethod
-    def add_handler(self, filter: Filter, handler: "Handler") -> None:
-        raise NotImplementedError
-
-    @abstractmethod
-    def prepare_handlers(self, event: EventContext) -> "Handler | None":
-        raise NotImplementedError
-
-
-class Handler(Protocol):
-    @abstractmethod
-    async def handle(self, context: EventContext) -> bool:
-        raise NotImplementedError
+from symposium.core import Handler, Router, EventContext
 
 
 class HandlerHolder(Protocol):
@@ -38,8 +10,20 @@ class HandlerHolder(Protocol):
         raise NotImplementedError
 
 
+class MetaHandler(Handler):
+    def __init__(self, handlers: list[Handler]) -> None:
+        self.handlers = handlers
+
+    async def handle(self, event: EventContext) -> bool:
+        for handler in self.handlers:
+            await handler.handle(event)
+        return True
+
+
 class FunctionalHandler(Handler):
-    def __init__(self, callback: Callable[[EventContext], Awaitable[bool]]) -> None:
+    def __init__(
+        self, callback: Callable[[EventContext], Awaitable[bool]]
+    ) -> None:
         self.callback = callback
 
     async def handle(self, context: EventContext) -> bool:
