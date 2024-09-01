@@ -27,7 +27,11 @@ async def on_any_widget_click(context: EventContext):
 
 window = Group(
     Format("Hello, {name}"),
-    Button(id="x", on_click=on_click),
+    Button(
+        text=Format("Click me!"),
+        id="x",
+        on_click=on_click,
+    ),
 )
 
 

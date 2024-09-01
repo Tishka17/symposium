@@ -1,9 +1,9 @@
 import asyncio
 import os
 
+from symposium.telebot import render_telebot, telebot_event, MessageManager, register_handler
 from telebot.async_telebot import AsyncTeleBot
 
-from symposium.telebot import render_telebot, telebot_event, MessageManager, register_handler
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
 from symposium.render import RenderingContext
@@ -27,7 +27,11 @@ async def on_any_widget_click(context: EventContext):
 
 window = Group(
     Format("Hello, {name}"),
-    Button(id="x", on_click=on_click),
+    Button(
+        text=Format("Click me!"),
+        id="x",
+        on_click=on_click,
+    ),
 )
 
 

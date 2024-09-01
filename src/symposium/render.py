@@ -1,6 +1,7 @@
-from abc import abstractmethod
-from dataclasses import dataclass, field
-from typing import Any, Protocol
+from dataclasses import dataclass
+from typing import Any
+
+from symposium.core import RenderingResult
 
 
 @dataclass(kw_only=True)
@@ -23,3 +24,9 @@ class Keyboard(RenderedItem):
 class Text(RenderedItem):
     text: str
     entities: list[Any] | None
+
+
+def extract_text(rendered: RenderingResult):
+    return "".join(
+        item.text for item in rendered.items if isinstance(item, Text)
+    )

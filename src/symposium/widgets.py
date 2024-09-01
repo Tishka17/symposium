@@ -10,13 +10,14 @@ from symposium.core import (
 )
 from symposium.events import Click, WidgetClick
 from symposium.handle import HandlerHolder, FunctionalHandler, emit
-from symposium.render import Keyboard, KeyboardButton, Text
+from symposium.render import Keyboard, KeyboardButton, Text, extract_text
 
 
 class Button(HandlerHolder, Handler, Renderer):
-    def __init__(self, id: str, on_click: Callable):
+    def __init__(self, id: str, text: Renderer, on_click: Callable):
         self.id = id
         self.on_click = on_click
+        self.text = text
 
     async def handle(self, context: EventContext) -> bool:
         await emit(
@@ -49,20 +50,11 @@ class Button(HandlerHolder, Handler, Renderer):
         return context.event.data == self.id
 
     def render(self, rendering_context: RenderingContext) -> RenderingResult:
-        return RenderingResult(
-            items=[
-                Keyboard(
-                    [
-                        [
-                            KeyboardButton(
-                                text="text",
-                                data=self.id,
-                            )
-                        ]
-                    ]
-                ),
-            ]
+        btn = KeyboardButton(
+            text=extract_text(self.text.render(rendering_context)),
+            data=self.id,
         )
+        return RenderingResult(items=[Keyboard([[btn]])])
 
 
 class Format(Renderer, HandlerHolder):

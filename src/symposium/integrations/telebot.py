@@ -3,7 +3,10 @@ from typing import Any
 
 from telebot.async_telebot import AsyncTeleBot
 from telebot.types import (
-    InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    CallbackQuery,
+    MessageEntity,
     Message,
 )
 
@@ -37,7 +40,7 @@ def _append_keyboard(item: Keyboard, target: TelebotRenderingResult) -> None:
             elif isinstance(button, KeyboardButton):
                 new_row.append(_to_inline_button(button))
             else:
-                raise ValueError(f'Unexpected button: {button}')
+                raise ValueError(f"Unexpected button: {button}")
         if new_row:
             target.reply_markup.keyboard.append(new_row)
 
@@ -59,11 +62,13 @@ def to_telebot(data: RenderingResult) -> TelebotRenderingResult:
             case Keyboard() as keyboard:
                 _append_keyboard(keyboard, res)
             case _:
-                raise ValueError(f'Unexpected item: {item}')
+                raise ValueError(f"Unexpected item: {item}")
     return res
 
 
-def render_telebot(widget: Renderer, context: RenderingContext) -> TelebotRenderingResult:
+def render_telebot(
+    widget: Renderer, context: RenderingContext
+) -> TelebotRenderingResult:
     return to_telebot(widget.render(context))
 
 
@@ -78,23 +83,29 @@ def telebot_event(context: EventContext) -> CallbackQuery | None:
 
 
 class TelebotAdapter:
-
     def __init__(self, router: Router):
         super().__init__()
         self.router = router
 
-    def filter_callback(self, event: CallbackQuery, ):
+    def filter_callback(
+        self,
+        event: CallbackQuery,
+    ):
         return bool(
-            self.router.prepare_handlers(EventContext(
-                event=Click(
-                    data=event.data,
-                    parent_event=event,
-                ),
-                router=self.router,
-            ))
+            self.router.prepare_handlers(
+                EventContext(
+                    event=Click(
+                        data=event.data,
+                        parent_event=event,
+                    ),
+                    router=self.router,
+                )
+            )
         )
 
-    async def handle_callback(self, event: CallbackQuery, **kwargs: Any) -> Any:
+    async def handle_callback(
+        self, event: CallbackQuery, **kwargs: Any
+    ) -> Any:
         click = EventContext(
             event=Click(
                 data=event.data,
@@ -112,8 +123,7 @@ def register_handler(widget: HandlerHolder, bot: AsyncTeleBot) -> Router:
 
     adapter = TelebotAdapter(symposium_router)
     bot.register_callback_query_handler(
-        adapter.handle_callback,
-        adapter.filter_callback
+        adapter.handle_callback, adapter.filter_callback
     )
     return symposium_router
 
@@ -123,8 +133,10 @@ class MessageManager:
         self.bot = bot
 
     async def send(
-            self, chat_id: int, data: TelebotRenderingResult,
-            **kwargs,
+        self,
+        chat_id: int,
+        data: TelebotRenderingResult,
+        **kwargs,
     ) -> Message:
         return await self.bot.send_message(
             chat_id=chat_id,

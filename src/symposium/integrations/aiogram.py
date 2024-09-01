@@ -4,7 +4,11 @@ from typing import Any
 from aiogram import Router as AiogramRouter, Bot
 from aiogram.dispatcher.event.bases import UNHANDLED
 from aiogram.types import (
-    InlineKeyboardButton, InlineKeyboardMarkup, CallbackQuery, MessageEntity, TelegramObject,
+    InlineKeyboardButton,
+    InlineKeyboardMarkup,
+    CallbackQuery,
+    MessageEntity,
+    TelegramObject,
     Message,
 )
 
@@ -38,7 +42,7 @@ def _append_keyboard(item: Keyboard, target: AiogramRenderingResult) -> None:
             elif isinstance(button, KeyboardButton):
                 new_row.append(_to_inline_button(button))
             else:
-                raise ValueError(f'Unexpected button: {button}')
+                raise ValueError(f"Unexpected button: {button}")
         if new_row:
             target.reply_markup.inline_keyboard.append(new_row)
 
@@ -60,11 +64,13 @@ def to_aiogram(data: RenderingResult) -> AiogramRenderingResult:
             case Keyboard() as keyboard:
                 _append_keyboard(keyboard, res)
             case _:
-                raise ValueError(f'Unexpected item: {item}')
+                raise ValueError(f"Unexpected item: {item}")
     return res
 
 
-def render_aiogram(widget: Renderer, context: RenderingContext) -> AiogramRenderingResult:
+def render_aiogram(
+    widget: Renderer, context: RenderingContext
+) -> AiogramRenderingResult:
     return to_aiogram(widget.render(context))
 
 
@@ -79,15 +85,18 @@ def aiogram_event(context: EventContext) -> TelegramObject | None:
 
 
 class AiogramRouterAdapter(AiogramRouter):
-
     def __init__(self, router: Router):
         super().__init__()
         self.router = router
 
-    def resolve_used_update_types(self, skip_events: set[str] | None = None) -> list[str]:
+    def resolve_used_update_types(
+        self, skip_events: set[str] | None = None
+    ) -> list[str]:
         return ["callback"]
 
-    async def propagate_event(self, update_type: str, event: TelegramObject, **kwargs: Any) -> Any:
+    async def propagate_event(
+        self, update_type: str, event: TelegramObject, **kwargs: Any
+    ) -> Any:
         if not isinstance(event, CallbackQuery):
             return UNHANDLED
 
@@ -118,8 +127,10 @@ class MessageManager:
         self.bot = bot
 
     async def send(
-            self, chat_id: int, data: AiogramRenderingResult,
-            **kwargs,
+        self,
+        chat_id: int,
+        data: AiogramRenderingResult,
+        **kwargs,
     ) -> Message:
         return await self.bot.send_message(
             chat_id=chat_id,
