@@ -1,6 +1,6 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Protocol
+from typing import Any, Protocol
 
 from symposium.core.finder import Finder
 
@@ -15,11 +15,13 @@ class RenderingResult:
     items: list[RenderedItem]
 
 
-@dataclass(frozen=True)
+@dataclass(frozen=True, kw_only=True)
 class RenderingContext:
     data: dict = field(default_factory=dict)
     cache: dict = field(default_factory=dict)
     ui_root: Finder | None = None
+    framework_data: Any = None
+    chat_key: Any
 
 
 class Renderer(Protocol):

@@ -5,11 +5,13 @@ from typing import Any, Protocol
 from .finder import Finder
 
 
-@dataclass
+@dataclass(frozen=True, kw_only=True)
 class EventContext:
     event: Any
     router: "Router"
     ui_root: Finder | None
+    framework_data: Any = None
+    chat_key: Any
 
 
 class Filter(Protocol):

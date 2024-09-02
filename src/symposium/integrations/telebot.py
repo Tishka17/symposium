@@ -12,9 +12,10 @@ from telebot.types import (
 
 from symposium.core import Finder, Renderer, RenderingContext, RenderingResult
 from symposium.events import Click, SymposiumEvent
-from symposium.handle import EventContext, HandlerHolder, Router
+from symposium.handle import EventContext, Router
 from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
+from symposium.widgets import BaseWidget
 
 
 @dataclass
@@ -124,12 +125,13 @@ class TelebotAdapter:
             ),
             router=self.router,
             ui_root=self.ui_root,
+            framework_data=kwargs,
         )
         handler = self.router.prepare_handlers(click)
         await handler.handle(click)
 
 
-def register_handler(widget: HandlerHolder, bot: AsyncTeleBot) -> Router:
+def register_handler(widget: BaseWidget, bot: AsyncTeleBot) -> Router:
     symposium_router = SimpleRouter()
     widget.register(symposium_router)
 
