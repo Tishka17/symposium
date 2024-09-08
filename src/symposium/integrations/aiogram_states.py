@@ -113,7 +113,7 @@ class AiogramRouterAdapter(AiogramRouter):
         await handler.handle(click)
 
 
-def setup_dialogs(router: AiogramRouter) -> Router:
+def setup_dialogs(router: AiogramRouter) -> DialogRegistry:
     symposium_router = SimpleRouter()
     registry = DialogRegistry(symposium_router)
 
