@@ -21,7 +21,7 @@ class RenderingContext:
     cache: dict = field(default_factory=dict)
     ui_root: Finder | None = None
     framework_data: Any = None
-    chat_key: Any
+    chat_key: Any = None
 
 
 class Renderer(Protocol):

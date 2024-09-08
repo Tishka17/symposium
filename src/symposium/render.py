@@ -23,7 +23,8 @@ class Keyboard(RenderedItem):
 @dataclass
 class Text(RenderedItem):
     text: str
-    entities: list[Any] | None
+
+
 
 
 def extract_text(rendered: RenderingResult):

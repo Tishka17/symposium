@@ -17,6 +17,9 @@ from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
 from symposium.widgets import BaseWidget
 
+@dataclass(frozen=True)
+class TelebotChatKey:
+    chat_id: int
 
 @dataclass
 class TelebotRenderingResult:
@@ -126,6 +129,7 @@ class TelebotAdapter:
             router=self.router,
             ui_root=self.ui_root,
             framework_data=kwargs,
+            chat_key=TelebotChatKey(chat_id=event.message.chat.id)
         )
         handler = self.router.prepare_handlers(click)
         await handler.handle(click)

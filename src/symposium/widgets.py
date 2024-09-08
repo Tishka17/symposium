@@ -105,7 +105,7 @@ class Format(BaseWidget):
         rendered_text = self.text.format_map(
             rendering_context.data,
         )
-        return self._rendered_single(Text(text=rendered_text, entities=None))
+        return self._rendered_single(Text(text=rendered_text))
 
 
 class Group(BaseWidget):

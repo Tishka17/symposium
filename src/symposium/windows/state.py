@@ -5,10 +5,10 @@ from typing import ClassVar, TypeGuard
 class State:
     _instances: ClassVar[int] = 0
 
-    def __init__(self):
+    def __init__(self, name: str | None = None):
         self.number = self._instances + 1
         State._instances += 1
-        self.name: str | None = None
+        self.name = name
         self.owner: type[StatesGroup] | None = None
 
     def __get__(self, instance, owner):
@@ -19,6 +19,8 @@ class State:
         self.owner = owner
 
     def __str__(self):
+        if self.owner is None:
+            return self.name
         return f"{self.owner.name}.{self.name}"
 
 
