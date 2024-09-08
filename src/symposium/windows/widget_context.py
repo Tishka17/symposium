@@ -8,7 +8,6 @@ from .transition_manager import TransitionManager
 
 @dataclass(frozen=True, kw_only=True)
 class StatefulContext:
-    chat_context: ChatT
     stack: DialogStack
     context: DialogContext
     transition_manager: TransitionManager

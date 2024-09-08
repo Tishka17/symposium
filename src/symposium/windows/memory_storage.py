@@ -9,7 +9,7 @@ class MemoryStorage(StackStorage[Any]):
         self.stacks: dict[Any, DialogStack] = {}
         self.contexts: dict[Any, DialogContext] = {}
 
-    async def load(self, query: ContextQuery[ChatT]) -> tuple[DialogStack, DialogContext | None]:
+    async def load_locked(self, query: ContextQuery[ChatT]) -> tuple[DialogStack, DialogContext | None]:
         if query.stack_id is SpecialIds.AUTO:
             if query.context_id is SpecialIds.AUTO:
                 raise ValueError("Cannot load auto-auto")

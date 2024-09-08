@@ -20,7 +20,6 @@ from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
 from symposium.widgets.base import BaseWidget
 from symposium.windows.widget_context import StatefulRenderingContext
-from symposium.windows.dialog import Adapter
 
 
 @dataclass(frozen=True)
@@ -161,23 +160,4 @@ class MessageManager:
             text=data.text,
             reply_markup=data.reply_markup,
             **kwargs,
-        )
-
-
-class AiogramAdapter(Adapter):
-    def __init__(self, bot: Bot):
-        self.bot = bot
-
-    async def show(
-        self,
-        rendering_result: RenderingResult,
-        rendering_context: StatefulRenderingContext,
-    ) -> None:
-        data = to_aiogram(rendering_result)
-        chat_key: AiogramChatKey = rendering_context.chat_key
-
-        await self.bot.send_message(
-            chat_id=chat_key.chat_id,
-            text=data.text,
-            reply_markup=data.reply_markup,
         )

@@ -34,3 +34,7 @@ class Router(Protocol):
     @abstractmethod
     def prepare_handlers(self, event: EventContext) -> Handler | None:
         raise NotImplementedError
+
+    @abstractmethod
+    async def handle(self, event: EventContext) -> bool:
+        raise NotImplementedError

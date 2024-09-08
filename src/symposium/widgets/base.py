@@ -31,11 +31,7 @@ class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
 
     async def _emit(self, old_context: EventContext, event: Any) -> bool:
         context = replace(old_context, event=event)
-        handler = context.router.prepare_handlers(context)
-        if not handler:
-            return False
-        await handler.handle(context)
-        return True
+        return await context.router.handle(context)
 
     async def handle(self, context: EventContext) -> None:
         pass

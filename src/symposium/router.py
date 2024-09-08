@@ -1,6 +1,6 @@
 from dataclasses import dataclass
 
-from symposium.core import EventContext, Filter, Handler
+from symposium.core import EventContext, Filter, Handler, Router
 from .handle import MetaHandler
 
 
@@ -10,7 +10,7 @@ class _RouterItem:
     handler: Handler
 
 
-class SimpleRouter:
+class SimpleRouter(Router):
     def __init__(self):
         self.handlers: list[_RouterItem] = []
 
@@ -25,3 +25,10 @@ class SimpleRouter:
         if handlers:
             return MetaHandler(handlers)
         return None
+
+    async def handle(self, event: EventContext) -> bool:
+        handler = self.prepare_handlers(event)
+        if not handler:
+            return False
+        await handler.handle(event)
+        return True
