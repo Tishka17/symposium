@@ -4,7 +4,7 @@ from typing import Protocol
 from symposium.core import EventContext, RenderingResult
 from symposium.events import Click
 from symposium.render import Keyboard, KeyboardButton
-from symposium.widgets import BaseWidget
+from symposium.widgets.base import BaseWidget
 from symposium.windows.context import (
     StatefulContext,
     StatefulEventContext,

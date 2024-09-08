@@ -7,8 +7,9 @@ from symposium.core import RenderingContext
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
 from symposium.integrations.telebot import render_telebot, telebot_event, MessageManager, register_handler
-from symposium.widgets import Button, Format
-from symposium.windows.window import GetterGroup
+from symposium.widgets.text import Format
+from symposium.widgets.keyboard import Button
+from symposium.widgets.group import Group
 
 
 async def getter(context: RenderingContext) -> dict:
@@ -30,7 +31,7 @@ async def on_any_widget_click(context: EventContext):
     print("Any click")
 
 
-window = GetterGroup(
+window = Group(
     Format("Hello, {name}"),
     Button(
         text=Format("Click me!"),

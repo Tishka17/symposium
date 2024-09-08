@@ -18,7 +18,7 @@ from symposium.events import Click, SymposiumEvent
 from symposium.handle import EventContext, Router
 from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
-from symposium.widgets import BaseWidget
+from symposium.widgets.base import BaseWidget
 from symposium.windows.context import StatefulRenderingContext
 from symposium.windows.dialog import Adapter
 
