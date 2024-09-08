@@ -5,7 +5,7 @@ from symposium.core import EventContext, RenderingResult
 from symposium.events import Click
 from symposium.render import Keyboard, KeyboardButton
 from symposium.widgets.base import BaseWidget
-from symposium.windows.context import (
+from symposium.windows.widget_context import (
     StatefulContext,
     StatefulEventContext,
     StatefulRenderingContext,

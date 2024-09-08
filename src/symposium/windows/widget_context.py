@@ -1,17 +1,17 @@
-from dataclasses import dataclass, field
-from typing import Any
+from dataclasses import dataclass
 
 from symposium.core import EventContext, RenderingContext
+from .stack import DialogStack, DialogContext
+from .storage import ChatT
 from .transition_manager import TransitionManager
 
 
 @dataclass(frozen=True, kw_only=True)
 class StatefulContext:
-    widget_data: dict[str, Any] = field(default_factory=dict)
-    dialog_data: dict[str, Any] = field(default_factory=dict)
+    chat_context: ChatT
+    stack: DialogStack
+    context: DialogContext
     transition_manager: TransitionManager
-    intent_id: str
-    stack_id: str
 
 
 @dataclass(frozen=True, kw_only=True)
