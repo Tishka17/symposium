@@ -21,7 +21,7 @@ from symposium.windows.widget_context import StatefulEventContext, StatefulRende
 CONTEXT_ID_SEP = "\x1D"
 
 
-def add_intent_id(
+def add_context_id(
         result: RenderingResult, context: StatefulRenderingContext,
 ) -> RenderingResult:
     new_items = []
@@ -72,8 +72,6 @@ class AiogramRouterAdapter(AiogramRouter):
         if not isinstance(event, CallbackQuery):
             return UNHANDLED
         callback_data = event.data
-        if CONTEXT_ID_SEP not in callback_data:
-            return UNHANDLED
 
         chat_context = ChatContext(
             user_id=event.from_user.id,
@@ -82,21 +80,31 @@ class AiogramRouterAdapter(AiogramRouter):
             business_connection_id=event.message.business_connection_id,
         )
 
-        context_id, data = callback_data.split(CONTEXT_ID_SEP, maxsplit=1)
-        stack, context = self.storge.load_locked(ContextQuery(
-            stack_id=SpecialIds.AUTO,
-            context_id=context_id,
-            chat=chat_context,
-        ))
+        if CONTEXT_ID_SEP in callback_data:
+            context_id, callback_data = callback_data.split(CONTEXT_ID_SEP, maxsplit=1)
+            query = ContextQuery(
+                stack_id=SpecialIds.AUTO,
+                context_id=context_id,
+                chat=chat_context,
+            )
+        else:
+            query = ContextQuery(
+                stack_id="",  # default
+                context_id=SpecialIds.AUTO,
+                chat=chat_context,
+            )
+        stack, context = await self.storge.load_locked(query)
 
         manager = SimpleTransitionManager(
+            chat=chat_context,
             context=context,
             stack=stack,
             registry=self.registry,
+            storage=self.storge,
         )
         click = StatefulEventContext(
             event=Click(
-                data=data,
+                data=callback_data,
                 parent_event=event,
             ),
             context=context,

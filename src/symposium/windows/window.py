@@ -13,6 +13,8 @@ class StateFilter(Filter):
     def __call__(self, context: EventContext) -> bool:
         if not isinstance(context, StatefulEventContext):
             return False
+        if context.context is None:
+            return False
         if context.context.state != self.state:
             return False
         return self.filter(context)
