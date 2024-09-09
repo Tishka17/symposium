@@ -1,10 +1,9 @@
 from typing import Any
 
-from aiogram import Router as AiogramRouter
-from aiogram.dispatcher.event.bases import UNHANDLED
-from aiogram.types import (
+from telebot import ContinueHandling
+from telebot.async_telebot import AsyncTeleBot
+from telebot.types import (
     CallbackQuery,
-    TelegramObject,
 )
 
 from symposium.integrations.telegram_base import ChatContext, TelegramHandler
@@ -13,25 +12,20 @@ from symposium.windows.memory_storage import MemoryStorage
 from symposium.windows.registry import DialogRegistry
 
 
-class AiogramRouterAdapter(AiogramRouter):
-    def __init__(self, telegram_handler: TelegramHandler):
+class TelebotHandlerAdapter:
+    def __init__(self, telegram_handler: TelegramHandler, bot: AsyncTeleBot):
         super().__init__()
         self.telegram_handler = telegram_handler
+        self.bot = bot
 
-    def resolve_used_update_types(
-            self,
-            skip_events: set[str] | None = None,
-    ) -> list[str]:
-        return ["callback"]
 
-    async def propagate_event(
+    async def handle_callback(
             self,
-            update_type: str,
-            event: TelegramObject,
+            event: CallbackQuery,
             **kwargs: Any,
     ) -> Any:
         if not isinstance(event, CallbackQuery):
-            return UNHANDLED
+            return ContinueHandling
 
         chat_context = ChatContext(
             user_id=event.from_user.id,
@@ -39,20 +33,24 @@ class AiogramRouterAdapter(AiogramRouter):
             thread_id=event.message.message_thread_id,
             business_connection_id=event.message.business_connection_id,
         )
+        kwargs["bot"] = self.bot
         if not await self.telegram_handler.handle_click(
                 callback_data=event.data,
                 chat_context=chat_context,
                 framework_data=kwargs,
                 event=event,
         ):
-            return UNHANDLED
+            return ContinueHandling
 
 
-def setup_dialogs(router: AiogramRouter) -> DialogRegistry:
+def setup_dialogs(bot: AsyncTeleBot) -> DialogRegistry:
     symposium_router = SimpleRouter()
     registry = DialogRegistry(symposium_router)
 
     telegram_handler = TelegramHandler(symposium_router, MemoryStorage(), registry)
-    adapter = AiogramRouterAdapter(telegram_handler)
-    router.include_router(adapter)
+    adapter = TelebotHandlerAdapter(telegram_handler, bot)
+    bot.register_callback_query_handler(
+        adapter.handle_callback,
+        lambda event: True,
+    )
     return registry

@@ -1,13 +1,13 @@
 import asyncio
 import os
 
-from aiogram import Bot, Dispatcher
+from telebot.async_telebot import AsyncTeleBot
 
 from symposium.core import RenderingContext
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
-from symposium.integrations.aiogram import aiogram_event, render_aiogram, MessageManager, to_aiogram
-from symposium.integrations.aiogram_states import setup_dialogs
+from symposium.integrations.telebot import telebot_event, render_telebot, MessageManager, to_telebot
+from symposium.integrations.telebot_states import setup_dialogs
 from symposium.integrations.telegram_base import add_context_id
 from symposium.widgets.group import Group
 from symposium.widgets.keyboard import Button
@@ -23,8 +23,7 @@ async def getter(context: RenderingContext) -> dict:
 
 async def on_click(context: EventContext):
     print("Click detected")
-    callback = aiogram_event(context)
-    await callback.answer("Click detected")
+    callback = telebot_event(context)
 
 
 def filter_widget_click(context: EventContext):
@@ -53,8 +52,8 @@ window = Window(
 
 
 async def on_simple_click(context: EventContext):
-    callback = aiogram_event(context)
-    await callback.answer("Simple click detected")
+    callback = telebot_event(context)
+
     assert isinstance(context, StatefulEventContext)
     await context.transition_manager.start(MainSG.start)
 
@@ -74,10 +73,11 @@ async def on_simple_click(context: EventContext):
     print("RENDERED", res)
 
     bot = context.framework_data["bot"]
+
     message_manager = MessageManager(bot)
     sent = await message_manager.send(
         context.chat_key.chat_id,
-        to_aiogram(res),
+        to_telebot(res),
     )
     print("SENT", sent)
 
@@ -94,24 +94,23 @@ simple = Group(
 
 
 async def main():
-    bot = Bot(token=os.getenv("BOT_TOKEN"))
+    bot = AsyncTeleBot(token=os.getenv("BOT_TOKEN"))
     message_manager = MessageManager(bot)
-    dp = Dispatcher()
-    registry = setup_dialogs(dp)
+    registry = setup_dialogs(bot)
     registry.include(window)
 
     symposium_router = registry.router
     symposium_router.add_handler(filter_widget_click, on_any_widget_click)
     simple.register(symposium_router)
 
-    rendered = await render_aiogram(simple)
+    rendered = await render_telebot(simple)
 
     await message_manager.send(
         chat_id=1,
         data=rendered,
     )
 
-    await dp.start_polling(bot)
+    await bot.infinity_polling()
 
 
 asyncio.run(main())
