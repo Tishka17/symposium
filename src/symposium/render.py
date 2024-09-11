@@ -25,8 +25,6 @@ class Text(RenderedItem):
     text: str
 
 
-
-
 def extract_text(rendered: RenderingResult):
     return "".join(
         item.text for item in rendered.items if isinstance(item, Text)

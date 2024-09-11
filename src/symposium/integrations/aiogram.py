@@ -19,7 +19,6 @@ from symposium.handle import EventContext, Router
 from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
 from symposium.widgets.base import BaseWidget
-from symposium.windows.widget_context import StatefulRenderingContext
 
 
 @dataclass(frozen=True)
@@ -81,7 +80,10 @@ async def render_aiogram(
     context: RenderingContext | None = None,
 ) -> AiogramRenderingResult:
     if context is None:
-        context = RenderingContext()
+        context = RenderingContext(
+            ui_root=widget,
+            chat_key=None,
+        )
     return to_aiogram(await widget.render(context))
 
 

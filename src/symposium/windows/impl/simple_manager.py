@@ -1,21 +1,21 @@
 import uuid
 from typing import Any
 
+from symposium.windows.protocols.storage import StackStorage
+from symposium.windows.protocols.transition_manager import TransitionManager
 from symposium.windows.registry import DialogRegistry
 from symposium.windows.stack import DialogContext, DialogStack
 from symposium.windows.state import State
-from symposium.windows.protocols.storage import StackStorage
-from symposium.windows.protocols.transition_manager import TransitionManager
 
 
 class SimpleTransitionManager(TransitionManager):
     def __init__(
-            self,
-            chat: Any,
-            registry: DialogRegistry,
-            context: DialogContext,
-            stack: DialogStack,
-            storage: StackStorage,
+        self,
+        chat: Any,
+        registry: DialogRegistry,
+        context: DialogContext,
+        stack: DialogStack,
+        storage: StackStorage,
     ):
         self._chat = chat
         self._registry = registry

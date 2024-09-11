@@ -1,13 +1,20 @@
 from dataclasses import dataclass
 from typing import Any
 
-from symposium.core import Router, RenderingResult
+from symposium.core import RenderingResult, Router
 from symposium.events import Click
 from symposium.render import Keyboard, KeyboardButton
-from symposium.windows.registry import DialogRegistry
 from symposium.windows.impl.simple_manager import SimpleTransitionManager
-from symposium.windows.protocols.storage import StackStorage, ContextQuery, SpecialIds
-from symposium.windows.widget_context import StatefulRenderingContext, StatefulEventContext
+from symposium.windows.protocols.storage import (
+    ContextQuery,
+    SpecialIds,
+    StackStorage,
+)
+from symposium.windows.registry import DialogRegistry
+from symposium.windows.widget_context import (
+    StatefulEventContext,
+    StatefulRenderingContext,
+)
 
 
 @dataclass(frozen=True)
@@ -18,11 +25,12 @@ class ChatContext:
     business_connection_id: str | None
 
 
-CONTEXT_ID_SEP = "\x1D"
+CONTEXT_ID_SEP = "\x1d"
 
 
 def add_context_id(
-        result: RenderingResult, context: StatefulRenderingContext,
+    result: RenderingResult,
+    context: StatefulRenderingContext,
 ) -> RenderingResult:
     new_items = []
     for item in result.items:
@@ -39,7 +47,7 @@ def add_context_id(
                         for button in row
                     ]
                     for row in item.buttons
-                ]
+                ],
             )
         new_items.append(item)
     return RenderingResult(items=new_items)
@@ -47,10 +55,10 @@ def add_context_id(
 
 class TelegramHandler:
     def __init__(
-            self,
-            router: Router,
-            storge: StackStorage,
-            registry: DialogRegistry,
+        self,
+        router: Router,
+        storge: StackStorage,
+        registry: DialogRegistry,
     ):
         super().__init__()
         self.router = router
@@ -58,15 +66,16 @@ class TelegramHandler:
         self.registry = registry
 
     async def handle_click(
-            self,
-            callback_data: str,
-            chat_context: Any,
-            event: Any,
-            framework_data: Any,
+        self,
+        callback_data: str,
+        chat_context: Any,
+        event: Any,
+        framework_data: Any,
     ):
-
         if CONTEXT_ID_SEP in callback_data:
-            context_id, callback_data = callback_data.split(CONTEXT_ID_SEP, maxsplit=1)
+            context_id, callback_data = callback_data.split(
+                CONTEXT_ID_SEP, maxsplit=1,
+            )
             query = ContextQuery(
                 stack_id=SpecialIds.AUTO,
                 context_id=context_id,

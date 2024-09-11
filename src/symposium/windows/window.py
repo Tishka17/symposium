@@ -1,4 +1,4 @@
-from symposium.core import Router, EventContext, Handler, Filter
+from symposium.core import EventContext, Filter, Handler, Router
 from symposium.widgets.base import BaseWidget, DataGetter
 from symposium.widgets.group import Group
 from symposium.windows.state import State
@@ -37,11 +37,11 @@ class RouterWrapper(Router):
 
 class Window(Group):
     def __init__(
-            self,
-            *widgets: BaseWidget,
-            id: str | None = None,
-            getter: DataGetter | None = None,
-            state: State | None = None,
+        self,
+        *widgets: BaseWidget,
+        id: str | None = None,
+        getter: DataGetter | None = None,
+        state: State | None = None,
     ):
         super().__init__(*widgets, id=id, getter=getter)
         self.state = state

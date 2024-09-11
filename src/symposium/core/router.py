@@ -2,16 +2,13 @@ from abc import abstractmethod
 from dataclasses import dataclass
 from typing import Any, Protocol
 
-from .finder import Finder
+from .context import BaseContext
 
 
 @dataclass(frozen=True, kw_only=True)
-class EventContext:
+class EventContext(BaseContext):
     event: Any
     router: "Router"
-    ui_root: Finder | None
-    framework_data: Any = None
-    chat_key: Any
 
 
 class Filter(Protocol):

@@ -46,8 +46,8 @@ class Button(BaseWidget):
         return context.event.data == self.id
 
     async def _render_single(
-            self,
-            rendering_context: RenderingContext,
+        self,
+        rendering_context: RenderingContext,
     ) -> Keyboard:
         btn = KeyboardButton(
             text=extract_text(await self.text.render(rendering_context)),

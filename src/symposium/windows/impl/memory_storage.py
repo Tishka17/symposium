@@ -1,7 +1,12 @@
 from typing import Any
 
-from symposium.windows.stack import DialogStack, DialogContext
-from symposium.windows.protocols.storage import StackStorage, ContextQuery, ChatT, SpecialIds
+from symposium.windows.protocols.storage import (
+    ChatT,
+    ContextQuery,
+    SpecialIds,
+    StackStorage,
+)
+from symposium.windows.stack import DialogContext, DialogStack
 
 
 class MemoryStorage(StackStorage[Any]):
@@ -9,7 +14,9 @@ class MemoryStorage(StackStorage[Any]):
         self.stacks: dict[Any, DialogStack] = {}
         self.contexts: dict[Any, DialogContext] = {}
 
-    async def load_locked(self, query: ContextQuery[ChatT]) -> tuple[DialogStack, DialogContext | None]:
+    async def load_locked(
+        self, query: ContextQuery[ChatT],
+    ) -> tuple[DialogStack, DialogContext | None]:
         if query.stack_id is SpecialIds.AUTO:
             if query.context_id is SpecialIds.AUTO:
                 raise ValueError("Cannot load auto-auto")
@@ -26,7 +33,9 @@ class MemoryStorage(StackStorage[Any]):
             else:
                 context_id = query.context_id
 
-        context: DialogContext = self.contexts.get((query.chat, context_id), None)
+        context: DialogContext = self.contexts.get(
+            (query.chat, context_id), None,
+        )
         if context is None:
             raise ValueError("Unknown context id")
 

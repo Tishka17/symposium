@@ -1,8 +1,8 @@
 from abc import abstractmethod
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import Protocol
 
-from symposium.core.finder import Finder
+from symposium.core.context import BaseContext
 
 
 @dataclass(kw_only=True)
@@ -16,12 +16,9 @@ class RenderingResult:
 
 
 @dataclass(frozen=True, kw_only=True)
-class RenderingContext:
+class RenderingContext(BaseContext):
     data: dict = field(default_factory=dict)
     cache: dict = field(default_factory=dict)
-    ui_root: Finder | None = None
-    framework_data: Any = None
-    chat_key: Any = None
 
 
 class Renderer(Protocol):

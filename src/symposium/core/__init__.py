@@ -1,4 +1,5 @@
 __all__ = [
+    "BaseContext",
     "Handler",
     "Router",
     "EventContext",
@@ -11,6 +12,7 @@ __all__ = [
     "Finder",
 ]
 
+from .context import BaseContext
 from .events import SymposiumEvent
 from .finder import Finder
 from .render import RenderedItem, Renderer, RenderingContext, RenderingResult

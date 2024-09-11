@@ -19,16 +19,16 @@ class AiogramRouterAdapter(AiogramRouter):
         self.telegram_handler = telegram_handler
 
     def resolve_used_update_types(
-            self,
-            skip_events: set[str] | None = None,
+        self,
+        skip_events: set[str] | None = None,
     ) -> list[str]:
         return ["callback"]
 
     async def propagate_event(
-            self,
-            update_type: str,
-            event: TelegramObject,
-            **kwargs: Any,
+        self,
+        update_type: str,
+        event: TelegramObject,
+        **kwargs: Any,
     ) -> Any:
         if not isinstance(event, CallbackQuery):
             return UNHANDLED
@@ -40,10 +40,10 @@ class AiogramRouterAdapter(AiogramRouter):
             business_connection_id=event.message.business_connection_id,
         )
         if not await self.telegram_handler.handle_click(
-                callback_data=event.data,
-                chat_context=chat_context,
-                framework_data=kwargs,
-                event=event,
+            callback_data=event.data,
+            chat_context=chat_context,
+            framework_data=kwargs,
+            event=event,
         ):
             return UNHANDLED
 
@@ -52,7 +52,9 @@ def setup_dialogs(router: AiogramRouter) -> DialogRegistry:
     symposium_router = SimpleRouter()
     registry = DialogRegistry(symposium_router)
 
-    telegram_handler = TelegramHandler(symposium_router, MemoryStorage(), registry)
+    telegram_handler = TelegramHandler(
+        symposium_router, MemoryStorage(), registry,
+    )
     adapter = AiogramRouterAdapter(telegram_handler)
     router.include_router(adapter)
     return registry

@@ -18,11 +18,10 @@ class TelebotHandlerAdapter:
         self.telegram_handler = telegram_handler
         self.bot = bot
 
-
     async def handle_callback(
-            self,
-            event: CallbackQuery,
-            **kwargs: Any,
+        self,
+        event: CallbackQuery,
+        **kwargs: Any,
     ) -> Any:
         if not isinstance(event, CallbackQuery):
             return ContinueHandling
@@ -35,10 +34,10 @@ class TelebotHandlerAdapter:
         )
         kwargs["bot"] = self.bot
         if not await self.telegram_handler.handle_click(
-                callback_data=event.data,
-                chat_context=chat_context,
-                framework_data=kwargs,
-                event=event,
+            callback_data=event.data,
+            chat_context=chat_context,
+            framework_data=kwargs,
+            event=event,
         ):
             return ContinueHandling
 
@@ -47,7 +46,9 @@ def setup_dialogs(bot: AsyncTeleBot) -> DialogRegistry:
     symposium_router = SimpleRouter()
     registry = DialogRegistry(symposium_router)
 
-    telegram_handler = TelegramHandler(symposium_router, MemoryStorage(), registry)
+    telegram_handler = TelegramHandler(
+        symposium_router, MemoryStorage(), registry,
+    )
     adapter = TelebotHandlerAdapter(telegram_handler, bot)
     bot.register_callback_query_handler(
         adapter.handle_callback,

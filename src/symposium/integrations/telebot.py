@@ -114,7 +114,7 @@ class TelebotAdapter:
                     ),
                     router=self.router,
                     ui_root=self.ui_root,
-                    chat_key=TelebotChatKey(chat_id=event.message.chat.id)
+                    chat_key=TelebotChatKey(chat_id=event.message.chat.id),
                 ),
             ),
         )
@@ -132,7 +132,7 @@ class TelebotAdapter:
             router=self.router,
             ui_root=self.ui_root,
             framework_data=kwargs,
-            chat_key=TelebotChatKey(chat_id=event.message.chat.id)
+            chat_key=TelebotChatKey(chat_id=event.message.chat.id),
         )
         handler = self.router.prepare_handlers(click)
         await handler.handle(click)

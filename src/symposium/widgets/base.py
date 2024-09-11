@@ -1,5 +1,6 @@
+from collections.abc import Awaitable, Callable
 from dataclasses import replace
-from typing import Any, Awaitable, Callable
+from typing import Any
 
 from symposium.core import (
     EventContext,
@@ -17,9 +18,9 @@ DataGetter = Callable[[RenderingContext], Awaitable[dict]]
 
 class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
     def __init__(
-            self,
-            id: str | None = None,
-            getter: DataGetter | None = None,
+        self,
+        id: str | None = None,
+        getter: DataGetter | None = None,
     ):
         self.id = id
         self.getter = getter
@@ -40,8 +41,8 @@ class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
         pass
 
     async def render(
-            self,
-            rendering_context: RenderingContext,
+        self,
+        rendering_context: RenderingContext,
     ) -> RenderingResult:
         # TODO when condition
         if self.getter:
@@ -60,13 +61,13 @@ class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
         return RenderingResult([])
 
     async def _render(
-            self,
-            rendering_context: RenderingContext,
+        self,
+        rendering_context: RenderingContext,
     ) -> RenderingResult:
         return NotImplemented
 
     async def _render_single(
-            self,
-            rendering_context: RenderingContext,
+        self,
+        rendering_context: RenderingContext,
     ) -> Any:
         return NotImplemented

@@ -15,8 +15,8 @@ class Format(BaseWidget):
         pass
 
     async def _render_single(
-            self,
-            rendering_context: RenderingContext,
+        self,
+        rendering_context: RenderingContext,
     ) -> Text:
         rendered_text = self.text.format_map(
             rendering_context.data,

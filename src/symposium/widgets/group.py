@@ -11,10 +11,10 @@ from .base import BaseWidget, DataGetter
 
 class Group(BaseWidget):
     def __init__(
-            self,
-            *widgets: BaseWidget,
-            id: str | None = None,
-            getter: DataGetter | None = None,
+        self,
+        *widgets: BaseWidget,
+        id: str | None = None,
+        getter: DataGetter | None = None,
     ):
         super().__init__(id=id, getter=getter)
         self.widgets = widgets
@@ -30,8 +30,8 @@ class Group(BaseWidget):
         return super().find(widget_id)
 
     async def _render(
-            self,
-            rendering_context: RenderingContext,
+        self,
+        rendering_context: RenderingContext,
     ) -> RenderingResult:
         if rendering_context.ui_root is None:
             rendering_context = replace(rendering_context, ui_root=self)

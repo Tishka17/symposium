@@ -1,13 +1,12 @@
 from dataclasses import dataclass
 
-from symposium.core import EventContext, RenderingContext
-from .stack import DialogStack, DialogContext
-from .protocols.storage import ChatT
+from symposium.core import BaseContext, EventContext, RenderingContext
 from .protocols.transition_manager import TransitionManager
+from .stack import DialogContext, DialogStack
 
 
 @dataclass(frozen=True, kw_only=True)
-class StatefulContext:
+class StatefulContext(BaseContext):
     stack: DialogStack
     context: DialogContext
     transition_manager: TransitionManager
