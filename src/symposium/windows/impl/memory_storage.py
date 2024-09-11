@@ -1,7 +1,7 @@
 from typing import Any
 
 from symposium.windows.stack import DialogStack, DialogContext
-from symposium.windows.storage import StackStorage, ContextQuery, ChatT, SpecialIds
+from symposium.windows.protocols.storage import StackStorage, ContextQuery, ChatT, SpecialIds
 
 
 class MemoryStorage(StackStorage[Any]):

@@ -5,8 +5,8 @@ from symposium.core import Router, RenderingResult
 from symposium.events import Click
 from symposium.render import Keyboard, KeyboardButton
 from symposium.windows.registry import DialogRegistry
-from symposium.windows.simple_manager import SimpleTransitionManager
-from symposium.windows.storage import StackStorage, ContextQuery, SpecialIds
+from symposium.windows.impl.simple_manager import SimpleTransitionManager
+from symposium.windows.protocols.storage import StackStorage, ContextQuery, SpecialIds
 from symposium.windows.widget_context import StatefulRenderingContext, StatefulEventContext
 
 

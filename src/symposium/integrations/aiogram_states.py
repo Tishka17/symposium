@@ -9,7 +9,7 @@ from aiogram.types import (
 
 from symposium.integrations.telegram_base import ChatContext, TelegramHandler
 from symposium.router import SimpleRouter
-from symposium.windows.memory_storage import MemoryStorage
+from symposium.windows.impl.memory_storage import MemoryStorage
 from symposium.windows.registry import DialogRegistry
 
 

@@ -2,8 +2,8 @@ from dataclasses import dataclass
 
 from symposium.core import EventContext, RenderingContext
 from .stack import DialogStack, DialogContext
-from .storage import ChatT
-from .transition_manager import TransitionManager
+from .protocols.storage import ChatT
+from .protocols.transition_manager import TransitionManager
 
 
 @dataclass(frozen=True, kw_only=True)

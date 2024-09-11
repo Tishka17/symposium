@@ -4,8 +4,8 @@ from typing import Any
 from symposium.windows.registry import DialogRegistry
 from symposium.windows.stack import DialogContext, DialogStack
 from symposium.windows.state import State
-from symposium.windows.storage import StackStorage
-from symposium.windows.transition_manager import TransitionManager
+from symposium.windows.protocols.storage import StackStorage
+from symposium.windows.protocols.transition_manager import TransitionManager
 
 
 class SimpleTransitionManager(TransitionManager):
