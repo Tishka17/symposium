@@ -17,6 +17,7 @@ class MemoryStorage(StackStorage[Any]):
     async def load_locked(
         self, query: ContextQuery[ChatT],
     ) -> tuple[DialogStack, DialogContext | None]:
+        print("load", query)
         if query.stack_id is SpecialIds.AUTO:
             if query.context_id is SpecialIds.AUTO:
                 raise ValueError("Cannot load auto-auto")
@@ -46,6 +47,7 @@ class MemoryStorage(StackStorage[Any]):
         return stack, context
 
     async def save_context(self, chat: ChatT, context: DialogContext) -> None:
+        print("save_context", context.id)
         self.contexts[(chat, context.id)] = context
 
     async def remove_context(self, chat: ChatT, context_id: str) -> None:

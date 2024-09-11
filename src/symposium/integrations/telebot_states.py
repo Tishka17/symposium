@@ -1,14 +1,14 @@
 from typing import Any
 
-from telebot import ContinueHandling
-from telebot.async_telebot import AsyncTeleBot
+from telebot.async_telebot import AsyncTeleBot, ContinueHandling
 from telebot.types import (
     CallbackQuery,
 )
 
 from symposium.integrations.telegram_base import ChatContext, TelegramHandler
 from symposium.router import SimpleRouter
-from symposium.windows.memory_storage import MemoryStorage
+from symposium.windows.impl.memory_storage import MemoryStorage
+from symposium.windows.manager_factory import ManagerFactory
 from symposium.windows.registry import DialogRegistry
 
 
@@ -24,7 +24,7 @@ class TelebotHandlerAdapter:
         **kwargs: Any,
     ) -> Any:
         if not isinstance(event, CallbackQuery):
-            return ContinueHandling
+            return ContinueHandling()
 
         chat_context = ChatContext(
             user_id=event.from_user.id,
@@ -39,19 +39,23 @@ class TelebotHandlerAdapter:
             framework_data=kwargs,
             event=event,
         ):
-            return ContinueHandling
+            print("return ContinueHandling")
+            return ContinueHandling()
 
 
-def setup_dialogs(bot: AsyncTeleBot) -> DialogRegistry:
+def setup_dialogs(bot: AsyncTeleBot) -> tuple[DialogRegistry, ManagerFactory]:
     symposium_router = SimpleRouter()
     registry = DialogRegistry(symposium_router)
-
-    telegram_handler = TelegramHandler(
-        symposium_router, MemoryStorage(), registry,
+    factory = ManagerFactory(
+        router=symposium_router,
+        registry=registry,
+        storge=MemoryStorage(),
     )
+
+    telegram_handler = TelegramHandler(symposium_router, factory)
     adapter = TelebotHandlerAdapter(telegram_handler, bot)
     bot.register_callback_query_handler(
         adapter.handle_callback,
         lambda event: True,
     )
-    return registry
+    return registry, factory

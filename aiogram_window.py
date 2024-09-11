@@ -6,14 +6,15 @@ from aiogram import Bot, Dispatcher
 from symposium.core import RenderingContext
 from symposium.events import WidgetClick
 from symposium.handle import EventContext, FunctionalHandler
-from symposium.integrations.aiogram import aiogram_event, render_aiogram, MessageManager, to_aiogram
+from symposium.integrations.aiogram import aiogram_event, render_aiogram, MessageManager, to_aiogram, register_handler
 from symposium.integrations.aiogram_states import setup_dialogs
 from symposium.integrations.telegram_base import add_context_id
 from symposium.widgets.group import Group
 from symposium.widgets.keyboard import Button
 from symposium.widgets.text import Format
+from symposium.windows.manager_factory import ManagerFactory
+from symposium.windows.protocols.storage import ContextQuery, SpecialIds
 from symposium.windows.state import State, StatesGroup
-from symposium.windows.widget_context import StatefulEventContext, StatefulRenderingContext
 from symposium.windows.window import Window
 
 
@@ -55,23 +56,23 @@ window = Window(
 async def on_simple_click(context: EventContext):
     callback = aiogram_event(context)
     await callback.answer("Simple click detected")
-    assert isinstance(context, StatefulEventContext)
-    await context.transition_manager.start(MainSG.start)
 
-    rendering_context = StatefulRenderingContext(
-        chat_key=context.chat_key,
-        ui_root=window,
-        framework_data=context.framework_data,
-        data={},
-        cache={},
-        context=context.transition_manager._context,
-        transition_manager=context.transition_manager,
-        stack=context.stack,
+    factory: ManagerFactory = context.framework_data["factory"]
+    manager = await factory.manager(
+        query=ContextQuery(
+            chat=context.chat_key,
+            stack_id="",
+            context_id=SpecialIds.AUTO,
+        ),
     )
+
+    await manager.start(MainSG.start)
+    rendering_context = manager.rendering_context(context.framework_data)
 
     res = await window.render(rendering_context)
     res = add_context_id(res, rendering_context)
     print("RENDERED", res)
+    print("Chat", context.chat_key)
 
     bot = context.framework_data["bot"]
     message_manager = MessageManager(bot)
@@ -97,13 +98,11 @@ async def main():
     bot = Bot(token=os.getenv("BOT_TOKEN"))
     message_manager = MessageManager(bot)
     dp = Dispatcher()
-    registry = setup_dialogs(dp)
+    registry, factory = setup_dialogs(dp)
+    dp["factory"] = factory
     registry.include(window)
 
-    symposium_router = registry.router
-    symposium_router.add_handler(filter_widget_click, on_any_widget_click)
-    simple.register(symposium_router)
-
+    register_handler(simple, dp)
     rendered = await render_aiogram(simple)
 
     await message_manager.send(

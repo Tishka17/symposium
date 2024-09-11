@@ -12,9 +12,11 @@ from symposium.integrations.telegram_base import add_context_id
 from symposium.widgets.group import Group
 from symposium.widgets.keyboard import Button
 from symposium.widgets.text import Format
+from symposium.windows.manager_factory import ManagerFactory
+from symposium.windows.protocols.storage import ContextQuery, SpecialIds
 from symposium.windows.state import State, StatesGroup
-from symposium.windows.widget_context import StatefulEventContext, StatefulRenderingContext
 from symposium.windows.window import Window
+from symposium.integrations.telebot import register_handler
 
 
 async def getter(context: RenderingContext) -> dict:
@@ -53,26 +55,21 @@ window = Window(
 
 async def on_simple_click(context: EventContext):
     callback = telebot_event(context)
-
-    assert isinstance(context, StatefulEventContext)
-    await context.transition_manager.start(MainSG.start)
-
-    rendering_context = StatefulRenderingContext(
-        chat_key=context.chat_key,
-        ui_root=window,
-        framework_data=context.framework_data,
-        data={},
-        cache={},
-        context=context.transition_manager._context,
-        transition_manager=context.transition_manager,
-        stack=context.stack,
+    bot = context.framework_data["bot"]
+    factory: ManagerFactory = bot.factory
+    print("on_simple_click")
+    manager = await factory.manager(
+        query=ContextQuery(
+            chat=context.chat_key,
+            stack_id="",
+            context_id=SpecialIds.AUTO,
+        ),
     )
-
+    await manager.start(MainSG.start)
+    rendering_context = manager.rendering_context(context.framework_data)
     res = await window.render(rendering_context)
     res = add_context_id(res, rendering_context)
     print("RENDERED", res)
-
-    bot = context.framework_data["bot"]
 
     message_manager = MessageManager(bot)
     sent = await message_manager.send(
@@ -96,13 +93,11 @@ simple = Group(
 async def main():
     bot = AsyncTeleBot(token=os.getenv("BOT_TOKEN"))
     message_manager = MessageManager(bot)
-    registry = setup_dialogs(bot)
+    registry, factory = setup_dialogs(bot)
+    bot.factory = factory
     registry.include(window)
 
-    symposium_router = registry.router
-    symposium_router.add_handler(filter_widget_click, on_any_widget_click)
-    simple.register(symposium_router)
-
+    register_handler(simple, bot)
     rendered = await render_telebot(simple)
 
     await message_manager.send(

@@ -13,14 +13,10 @@ from telebot.types import (
 from symposium.core import Finder, Renderer, RenderingContext, RenderingResult
 from symposium.events import Click, SymposiumEvent
 from symposium.handle import EventContext, Router
+from symposium.integrations.telegram_base import ChatContext
 from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
 from symposium.widgets.base import BaseWidget
-
-
-@dataclass(frozen=True)
-class TelebotChatKey:
-    chat_id: int
 
 
 @dataclass
@@ -77,7 +73,10 @@ async def render_telebot(
     context: RenderingContext | None = None,
 ) -> TelebotRenderingResult:
     if context is None:
-        context = RenderingContext()
+        context = RenderingContext(
+            ui_root=widget,
+            chat_key=None,
+        )
     return to_telebot(await widget.render(context))
 
 
@@ -105,7 +104,13 @@ class TelebotAdapter:
         self,
         event: CallbackQuery,
     ):
-        return bool(
+        chat_key = ChatContext(
+            user_id=event.from_user.id,
+            chat_id=event.message.chat.id,
+            thread_id=event.message.message_thread_id,
+            business_connection_id=event.message.business_connection_id,
+        )
+        res = bool(
             self.router.prepare_handlers(
                 EventContext(
                     event=Click(
@@ -114,16 +119,25 @@ class TelebotAdapter:
                     ),
                     router=self.router,
                     ui_root=self.ui_root,
-                    chat_key=TelebotChatKey(chat_id=event.message.chat.id),
+                    chat_key=chat_key,
                 ),
             ),
         )
+        print("FILTERED", res)
+        return res
 
     async def handle_callback(
         self,
         event: CallbackQuery,
         **kwargs: Any,
     ) -> Any:
+        print("FILTER")
+        chat_key = ChatContext(
+            user_id=event.from_user.id,
+            chat_id=event.message.chat.id,
+            thread_id=event.message.message_thread_id,
+            business_connection_id=event.message.business_connection_id,
+        )
         click = EventContext(
             event=Click(
                 data=event.data,
@@ -132,10 +146,9 @@ class TelebotAdapter:
             router=self.router,
             ui_root=self.ui_root,
             framework_data=kwargs,
-            chat_key=TelebotChatKey(chat_id=event.message.chat.id),
+            chat_key=chat_key,
         )
-        handler = self.router.prepare_handlers(click)
-        await handler.handle(click)
+        await self.router.handle(click)
 
 
 def register_handler(widget: BaseWidget, bot: AsyncTeleBot) -> Router:
@@ -146,6 +159,7 @@ def register_handler(widget: BaseWidget, bot: AsyncTeleBot) -> Router:
     bot.register_callback_query_handler(
         adapter.handle_callback,
         adapter.filter_callback,
+        pass_bot=True,
     )
     return symposium_router
 

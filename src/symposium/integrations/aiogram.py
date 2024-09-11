@@ -16,14 +16,10 @@ from aiogram.types import (
 from symposium.core import Finder, Renderer, RenderingContext, RenderingResult
 from symposium.events import Click, SymposiumEvent
 from symposium.handle import EventContext, Router
+from symposium.integrations.telegram_base import ChatContext
 from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
 from symposium.widgets.base import BaseWidget
-
-
-@dataclass(frozen=True)
-class AiogramChatKey:
-    chat_id: int
 
 
 @dataclass
@@ -122,6 +118,12 @@ class AiogramRouterAdapter(AiogramRouter):
         if not isinstance(event, CallbackQuery):
             return UNHANDLED
 
+        chat_key = ChatContext(
+            user_id=event.from_user.id,
+            chat_id=event.message.chat.id,
+            thread_id=event.message.message_thread_id,
+            business_connection_id=event.message.business_connection_id,
+        )
         click = EventContext(
             event=Click(
                 data=event.data,
@@ -130,7 +132,7 @@ class AiogramRouterAdapter(AiogramRouter):
             router=self.router,
             ui_root=self.ui_root,
             framework_data=kwargs,
-            chat_key=AiogramChatKey(chat_id=event.message.chat.id),
+            chat_key=chat_key,
         )
         handler = self.router.prepare_handlers(click)
         if not handler:

@@ -5,6 +5,7 @@ from symposium.core import RenderingResult, Router
 from symposium.events import Click
 from symposium.render import Keyboard, KeyboardButton
 from symposium.windows.impl.simple_manager import SimpleTransitionManager
+from symposium.windows.manager_factory import ManagerFactory
 from symposium.windows.protocols.storage import (
     ContextQuery,
     SpecialIds,
@@ -57,13 +58,11 @@ class TelegramHandler:
     def __init__(
         self,
         router: Router,
-        storge: StackStorage,
-        registry: DialogRegistry,
+        factory: ManagerFactory,
     ):
         super().__init__()
-        self.router = router
-        self.storge = storge
-        self.registry = registry
+        self._factory = factory
+        self._router = router
 
     async def handle_click(
         self,
@@ -88,30 +87,16 @@ class TelegramHandler:
                 chat=chat_context,
             )
 
-        stack, context = await self.storge.load_locked(query)
-
-        manager = SimpleTransitionManager(
-            chat=chat_context,
-            context=context,
-            stack=stack,
-            registry=self.registry,
-            storage=self.storge,
-        )
-        click = StatefulEventContext(
+        manager = await self._factory.manager(query)
+        click = manager.event_context(
             event=Click(
                 data=callback_data,
                 parent_event=event,
             ),
-            context=context,
-            stack=stack,
-            transition_manager=manager,
-            router=self.router,
-            ui_root=manager,
+            router=self._router,
             framework_data=framework_data,
-            chat_key=chat_context,
         )
-        handler = self.router.prepare_handlers(click)
-        if not handler:
-            return False
-        await handler.handle(click)
-        return True
+        print("handle")
+        res = await self._router.handle(click)
+        print("handle", res)
+        return res

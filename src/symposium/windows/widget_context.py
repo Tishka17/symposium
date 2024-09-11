@@ -1,7 +1,7 @@
 from dataclasses import dataclass
+from typing import Any
 
 from symposium.core import BaseContext, EventContext, RenderingContext
-from .protocols.transition_manager import TransitionManager
 from .stack import DialogContext, DialogStack
 
 
@@ -9,7 +9,7 @@ from .stack import DialogContext, DialogStack
 class StatefulContext(BaseContext):
     stack: DialogStack
     context: DialogContext
-    transition_manager: TransitionManager
+    transition_manager: Any
 
 
 @dataclass(frozen=True, kw_only=True)

@@ -10,6 +10,7 @@ from aiogram.types import (
 from symposium.integrations.telegram_base import ChatContext, TelegramHandler
 from symposium.router import SimpleRouter
 from symposium.windows.impl.memory_storage import MemoryStorage
+from symposium.windows.manager_factory import ManagerFactory
 from symposium.windows.registry import DialogRegistry
 
 
@@ -48,13 +49,15 @@ class AiogramRouterAdapter(AiogramRouter):
             return UNHANDLED
 
 
-def setup_dialogs(router: AiogramRouter) -> DialogRegistry:
+def setup_dialogs(router: AiogramRouter) -> tuple[DialogRegistry, ManagerFactory]:
     symposium_router = SimpleRouter()
     registry = DialogRegistry(symposium_router)
-
-    telegram_handler = TelegramHandler(
-        symposium_router, MemoryStorage(), registry,
+    factory = ManagerFactory(
+        router=symposium_router,
+        registry=registry,
+        storge=MemoryStorage(),
     )
+    telegram_handler = TelegramHandler(symposium_router, factory)
     adapter = AiogramRouterAdapter(telegram_handler)
     router.include_router(adapter)
-    return registry
+    return registry, factory
