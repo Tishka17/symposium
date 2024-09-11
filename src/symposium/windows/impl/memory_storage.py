@@ -15,7 +15,8 @@ class MemoryStorage(StackStorage[Any]):
         self.contexts: dict[Any, DialogContext] = {}
 
     async def load_locked(
-        self, query: ContextQuery[ChatT],
+        self,
+        query: ContextQuery[ChatT],
     ) -> tuple[DialogStack, DialogContext | None]:
         print("load", query)
         if query.stack_id is SpecialIds.AUTO:
@@ -35,7 +36,8 @@ class MemoryStorage(StackStorage[Any]):
                 context_id = query.context_id
 
         context: DialogContext = self.contexts.get(
-            (query.chat, context_id), None,
+            (query.chat, context_id),
+            None,
         )
         if context is None:
             raise ValueError("Unknown context id")

@@ -70,10 +70,11 @@ async def on_simple_click(context: EventContext):
     print("Chat", context.chat_key)
 
     # dirty hack
-    sent = await bot.sender(
-        bot,
+    converted = await bot.message_manager.convert(res)
+
+    sent = await bot.message_manager.send(
         context.chat_key.chat_id,
-        res,
+        converted,
     )
 
 

@@ -1,13 +1,16 @@
 import uuid
 from typing import Any
 
-from symposium.core import SymposiumEvent, Router
+from symposium.core import Router, SymposiumEvent
 from symposium.windows.protocols.storage import StackStorage
 from symposium.windows.protocols.transition_manager import TransitionManager
 from symposium.windows.registry import DialogRegistry
 from symposium.windows.stack import DialogContext, DialogStack
 from symposium.windows.state import State
-from symposium.windows.widget_context import StatefulEventContext, StatefulRenderingContext
+from symposium.windows.widget_context import (
+    StatefulEventContext,
+    StatefulRenderingContext,
+)
 
 
 class SimpleTransitionManager(TransitionManager):
@@ -25,8 +28,9 @@ class SimpleTransitionManager(TransitionManager):
         self._stack = stack
         self._storage = storage
 
-
-    def event_context(self, event: SymposiumEvent, router: Router, framework_data: Any) -> StatefulEventContext:
+    def event_context(
+        self, event: SymposiumEvent, router: Router, framework_data: Any,
+    ) -> StatefulEventContext:
         return StatefulEventContext(
             event=event,
             context=self._context,
@@ -38,7 +42,9 @@ class SimpleTransitionManager(TransitionManager):
             chat_key=self._chat,
         )
 
-    def rendering_context(self, framework_data: Any) -> StatefulRenderingContext:
+    def rendering_context(
+        self, framework_data: Any,
+    ) -> StatefulRenderingContext:
         return StatefulRenderingContext(
             context=self._context,
             stack=self._stack,

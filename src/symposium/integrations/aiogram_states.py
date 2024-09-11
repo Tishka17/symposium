@@ -49,7 +49,9 @@ class AiogramRouterAdapter(AiogramRouter):
             return UNHANDLED
 
 
-def setup_dialogs(router: AiogramRouter) -> tuple[DialogRegistry, ManagerFactory]:
+def setup_dialogs(
+    router: AiogramRouter,
+) -> tuple[DialogRegistry, ManagerFactory]:
     symposium_router = SimpleRouter()
     registry = DialogRegistry(symposium_router)
     factory = ManagerFactory(

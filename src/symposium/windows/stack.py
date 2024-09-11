@@ -9,7 +9,8 @@ class DialogStack:
     _id: str = field(compare=True)
     intents: list[str] = field(compare=False, default_factory=list)
     access_settings: dict[str, Any] = field(
-        compare=False, default_factory=dict,
+        compare=False,
+        default_factory=dict,
     )
 
     @property
@@ -27,7 +28,8 @@ class DialogContext:
     widget_data: dict[str, Any] = field(compare=False, default_factory=dict)
     caller_data: dict[str, Any] = field(compare=False, default_factory=dict)
     access_settings: dict[str, Any] = field(
-        compare=False, default_factory=dict,
+        compare=False,
+        default_factory=dict,
     )
 
     @property

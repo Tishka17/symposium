@@ -153,6 +153,9 @@ class MessageManager:
     def __init__(self, bot: Bot):
         self.bot = bot
 
+    async def convert(self, result: RenderingResult) -> AiogramRenderingResult:
+        return to_aiogram(result)
+
     async def send(
         self,
         chat_id: int,

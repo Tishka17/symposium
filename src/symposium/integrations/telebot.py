@@ -168,6 +168,9 @@ class MessageManager:
     def __init__(self, bot: AsyncTeleBot):
         self.bot = bot
 
+    async def convert(self, result: RenderingResult) -> TelebotRenderingResult:
+        return to_telebot(result)
+
     async def send(
         self,
         chat_id: int,

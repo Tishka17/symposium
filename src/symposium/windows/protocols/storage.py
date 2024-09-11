@@ -23,7 +23,8 @@ class ContextQuery(Generic[ChatT]):
 class StackStorage(Protocol[ChatT]):
     @abstractmethod
     async def load_locked(
-        self, query: ContextQuery[ChatT],
+        self,
+        query: ContextQuery[ChatT],
     ) -> tuple[DialogStack, DialogContext | None]:
         raise NotImplementedError
 

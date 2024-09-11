@@ -4,16 +4,12 @@ from typing import Any
 from symposium.core import RenderingResult, Router
 from symposium.events import Click
 from symposium.render import Keyboard, KeyboardButton
-from symposium.windows.impl.simple_manager import SimpleTransitionManager
 from symposium.windows.manager_factory import ManagerFactory
 from symposium.windows.protocols.storage import (
     ContextQuery,
     SpecialIds,
-    StackStorage,
 )
-from symposium.windows.registry import DialogRegistry
 from symposium.windows.widget_context import (
-    StatefulEventContext,
     StatefulRenderingContext,
 )
 
@@ -73,7 +69,8 @@ class TelegramHandler:
     ):
         if CONTEXT_ID_SEP in callback_data:
             context_id, callback_data = callback_data.split(
-                CONTEXT_ID_SEP, maxsplit=1,
+                CONTEXT_ID_SEP,
+                maxsplit=1,
             )
             query = ContextQuery(
                 stack_id=SpecialIds.AUTO,
