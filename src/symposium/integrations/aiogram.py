@@ -148,7 +148,8 @@ class AiogramRouterAdapter(AiogramRouter):
 
 
 def register_handler(
-    widget: BaseWidget, router: AiogramRouter,
+    widget: BaseWidget,
+    router: AiogramRouter,
 ) -> RouteRegistry:
     symposium_router = SimpleRouter()
     widget.register(symposium_router)

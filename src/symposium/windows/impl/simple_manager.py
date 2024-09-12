@@ -3,6 +3,7 @@ from typing import Any
 from symposium.core import Router, SymposiumEvent
 from symposium.windows.impl.transitions import TransitionManager
 from symposium.windows.protocols.dialog_manager import DialogManager
+from symposium.windows.protocols.window_sender import WindowSender
 from symposium.windows.registry import DialogRegistry
 from symposium.windows.state import State
 from symposium.windows.widget_context import (
@@ -17,10 +18,14 @@ class SimpleDialogManager(DialogManager):
         chat: Any,
         registry: DialogRegistry,
         transition_manager: TransitionManager,
+        window_sender: WindowSender,
+        framework_data: Any,
     ):
         self._chat = chat
         self._registry = registry
         self._transition_manager = transition_manager
+        self._window_sender = window_sender
+        self._framework_data = framework_data
 
     def event_context(
         self,
@@ -53,7 +58,10 @@ class SimpleDialogManager(DialogManager):
         )
 
     async def _show(self):
-        pass
+        rendering_context = self.rendering_context(self._framework_data)
+        window = self._registry.find_window(self.get_current_state())
+        res = await window.render(rendering_context)
+        await self._window_sender.send(res, rendering_context)
 
     async def close(self):
         await self._transition_manager.close()

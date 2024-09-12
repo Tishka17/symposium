@@ -59,24 +59,10 @@ async def on_simple_click(context: BaseEventContext):
             stack_id="",
             context_id=SpecialIds.AUTO,
         ),
+        framework_data=context.framework_data,
     )
 
     await manager.start(MainSG.start)
-    rendering_context = manager.rendering_context(context.framework_data)
-
-    res = await window.render(rendering_context)
-    res = add_context_id(res, rendering_context)
-    print("RENDERED", res)
-    print("Chat", context.chat_key)
-
-    # dirty hack
-    converted = await bot.message_manager.convert(res)
-
-    sent = await bot.message_manager.send(
-        context.chat_key.chat_id,
-        converted,
-    )
-
 
 
 simple = Group(

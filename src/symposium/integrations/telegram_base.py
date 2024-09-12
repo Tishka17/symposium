@@ -84,7 +84,7 @@ class TelegramHandler:
                 chat=chat_context,
             )
 
-        manager = await self._factory.manager(query)
+        manager = await self._factory.manager(query, framework_data)
         click = manager.event_context(
             event=Click(
                 data=callback_data,
