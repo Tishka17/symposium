@@ -29,7 +29,10 @@ class SimpleTransitionManager(TransitionManager):
         self._storage = storage
 
     def event_context(
-        self, event: SymposiumEvent, router: Router, framework_data: Any,
+        self,
+        event: SymposiumEvent,
+        router: Router,
+        framework_data: Any,
     ) -> StatefulEventContext:
         return StatefulEventContext(
             event=event,
@@ -43,7 +46,8 @@ class SimpleTransitionManager(TransitionManager):
         )
 
     def rendering_context(
-        self, framework_data: Any,
+        self,
+        framework_data: Any,
     ) -> StatefulRenderingContext:
         return StatefulRenderingContext(
             context=self._context,

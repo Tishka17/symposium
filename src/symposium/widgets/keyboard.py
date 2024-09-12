@@ -1,14 +1,13 @@
 from collections.abc import Callable
 
 from symposium.core import (
-    EventContext,
     Renderer,
     RenderingContext,
-    Router,
 )
 from symposium.events import Click, WidgetClick
 from symposium.handle import FunctionalHandler
 from symposium.render import Keyboard, KeyboardButton, extract_text
+from ..core.router import BaseEventContext, RouteRegistry
 from .base import BaseWidget
 
 
@@ -18,7 +17,7 @@ class Button(BaseWidget):
         self.on_click = on_click
         self.text = text
 
-    async def handle(self, context: EventContext) -> None:
+    async def handle(self, context: BaseEventContext) -> None:
         await self._emit(
             context,
             WidgetClick(
@@ -28,19 +27,19 @@ class Button(BaseWidget):
             ),
         )
 
-    def register(self, router: Router) -> None:
+    def register(self, router: RouteRegistry) -> None:
         router.add_handler(self._filter, self)
         router.add_handler(
             self._filter_click,
             FunctionalHandler(self.on_click),
         )
 
-    def _filter_click(self, context: EventContext) -> bool:
+    def _filter_click(self, context: BaseEventContext) -> bool:
         if not isinstance(context.event, WidgetClick):
             return False
         return context.event.source is self
 
-    def _filter(self, context: EventContext) -> bool:
+    def _filter(self, context: BaseEventContext) -> bool:
         if not isinstance(context.event, Click):
             return False
         return context.event.data == self.id

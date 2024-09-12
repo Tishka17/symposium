@@ -1,4 +1,3 @@
-
 from symposium.core import Router
 from symposium.windows.impl.simple_manager import SimpleTransitionManager
 from symposium.windows.protocols.storage import ContextQuery, StackStorage

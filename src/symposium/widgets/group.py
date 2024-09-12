@@ -4,8 +4,8 @@ from typing import Any
 from symposium.core import (
     RenderingContext,
     RenderingResult,
-    Router,
 )
+from ..core.router import RouteRegistry
 from .base import BaseWidget, DataGetter
 
 
@@ -19,7 +19,7 @@ class Group(BaseWidget):
         super().__init__(id=id, getter=getter)
         self.widgets = widgets
 
-    def register(self, router: Router) -> None:
+    def register(self, router: RouteRegistry) -> None:
         for widget in self.widgets:
             widget.register(router)
 

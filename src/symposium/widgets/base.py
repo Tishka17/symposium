@@ -3,20 +3,18 @@ from dataclasses import replace
 from typing import Any
 
 from symposium.core import (
-    EventContext,
-    Handler,
     Renderer,
     RenderingContext,
     RenderingResult,
-    Router,
 )
 from symposium.core.finder import Finder
+from symposium.core.router import BaseEventContext, RouteRegistry
 from symposium.handle import HandlerHolder
 
 DataGetter = Callable[[RenderingContext], Awaitable[dict]]
 
 
-class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
+class BaseWidget(Finder, Renderer, HandlerHolder):
     def __init__(
         self,
         id: str | None = None,
@@ -30,14 +28,11 @@ class BaseWidget(Finder, Renderer, HandlerHolder, Handler):
             return self
         return None
 
-    async def _emit(self, old_context: EventContext, event: Any) -> bool:
+    async def _emit(self, old_context: BaseEventContext, event: Any) -> bool:
         context = replace(old_context, event=event)
         return await context.router.handle(context)
 
-    async def handle(self, context: EventContext) -> None:
-        pass
-
-    def register(self, router: Router) -> None:
+    def register(self, router: RouteRegistry) -> None:
         pass
 
     async def render(

@@ -1,4 +1,5 @@
-from symposium.core import EventContext, Filter, Handler, Router
+from symposium.core import Filter, Handler
+from symposium.core.router import BaseEventContext, RouteRegistry
 from symposium.widgets.base import BaseWidget, DataGetter
 from symposium.widgets.group import Group
 from symposium.windows.state import State
@@ -10,7 +11,7 @@ class StateFilter(Filter):
         self.state = state
         self.filter = filter
 
-    def __call__(self, context: EventContext) -> bool:
+    def __call__(self, context: BaseEventContext) -> bool:
         if not isinstance(context, StatefulEventContext):
             return False
         if context.context is None:
@@ -20,19 +21,13 @@ class StateFilter(Filter):
         return self.filter(context)
 
 
-class RouterWrapper(Router):
-    def __init__(self, router: Router, state: State):
+class RouterWrapper(RouteRegistry):
+    def __init__(self, router: RouteRegistry, state: State):
         self.router = router
         self.state = state
 
     def add_handler(self, filter: Filter, handler: Handler) -> None:
         self.router.add_handler(StateFilter(self.state, filter), handler)
-
-    def prepare_handlers(self, event: EventContext) -> Handler | None:
-        raise NotImplementedError
-
-    def handle(self, event: EventContext) -> bool:
-        raise NotImplementedError
 
 
 class Window(Group):
@@ -46,6 +41,6 @@ class Window(Group):
         super().__init__(*widgets, id=id, getter=getter)
         self.state = state
 
-    def register(self, router: Router) -> None:
+    def register(self, router: RouteRegistry) -> None:
         wrapper = RouterWrapper(router, self.state)
         super().register(wrapper)

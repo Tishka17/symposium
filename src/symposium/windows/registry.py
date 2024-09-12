@@ -1,10 +1,10 @@
-from symposium.core import Router
+from symposium.core.router import RouteRegistry
 from symposium.windows.state import State
 from symposium.windows.window import Window
 
 
 class DialogRegistry:
-    def __init__(self, router: Router):
+    def __init__(self, router: RouteRegistry):
         self.windows = {}
         self.router = router
 

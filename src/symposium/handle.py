@@ -1,13 +1,14 @@
 from abc import abstractmethod
 from collections.abc import Awaitable, Callable
-from typing import Protocol
+from typing import Any, Protocol
 
-from symposium.core import EventContext, Handler, Router
+from symposium.core import Handler
+from symposium.core.router import BaseEventContext, RouteRegistry
 
 
 class HandlerHolder(Protocol):
     @abstractmethod
-    def register(self, router: Router) -> None:
+    def register(self, router: RouteRegistry) -> None:
         raise NotImplementedError
 
 
@@ -15,17 +16,17 @@ class MetaHandler(Handler):
     def __init__(self, handlers: list[Handler]) -> None:
         self.handlers = handlers
 
-    async def handle(self, event: EventContext) -> None:
+    async def handle(self, context: BaseEventContext) -> None:
         for handler in self.handlers:
-            await handler.handle(event)
+            await handler.handle(context)
 
 
 class FunctionalHandler(Handler):
     def __init__(
         self,
-        callback: Callable[[EventContext], Awaitable[bool]],
+        callback: Callable[[BaseEventContext], Awaitable[Any]],
     ) -> None:
         self.callback = callback
 
-    async def handle(self, context: EventContext) -> bool:
-        return await self.callback(context)
+    async def handle(self, context: BaseEventContext) -> None:
+        await self.callback(context)

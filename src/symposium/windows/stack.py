@@ -7,6 +7,7 @@ from .state import State
 @dataclass(unsafe_hash=True)
 class DialogStack:
     _id: str = field(compare=True)
+    _last_intent_number: int = 0
     intents: list[str] = field(compare=False, default_factory=list)
     access_settings: dict[str, Any] = field(
         compare=False,
@@ -16,6 +17,10 @@ class DialogStack:
     @property
     def id(self):
         return self._id
+
+    def new_intent_number(self):
+        self._last_intent_number = (self._last_intent_number + 1) % 1000
+        return self._last_intent_number
 
 
 @dataclass(unsafe_hash=True)
