@@ -7,6 +7,6 @@ from symposium.core import RenderingContext, RenderingResult
 class WindowSender(Protocol):
     @abstractmethod
     async def send(
-        self, data: RenderingResult, context: RenderingContext
+        self, data: RenderingResult, context: RenderingContext,
     ) -> None:
         raise NotImplementedError

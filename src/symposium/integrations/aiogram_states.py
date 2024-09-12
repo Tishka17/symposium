@@ -58,7 +58,7 @@ class AiogramRouterAdapter(AiogramRouter):
 
 class Sender(WindowSender):
     async def send(
-        self, data: RenderingResult, context: RenderingContext
+        self, data: RenderingResult, context: RenderingContext,
     ) -> None:
         bot = context.framework_data["bot"]
         data = add_context_id(data, context)
