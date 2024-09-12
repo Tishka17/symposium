@@ -3,7 +3,7 @@ import os
 
 from aiogram import Bot, Dispatcher
 
-from dialogs import window, simple
+from dialogs import window, simple, window2
 from symposium.integrations.aiogram import render_aiogram, MessageManager, register_handler
 from symposium.integrations.aiogram_states import setup_dialogs
 
@@ -15,6 +15,7 @@ async def main():
     bot.factory = factory
     bot.message_manager = MessageManager(bot)
     registry.include(window)
+    registry.include(window2)
 
     register_handler(simple, dp)
     rendered = await render_aiogram(simple)

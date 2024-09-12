@@ -26,6 +26,10 @@ async def on_click(context: BaseEventContext):
     )
 
 
+async def next(context: BaseEventContext):
+    await context.dialog_manager.switch(MainSG.second)
+
+
 def filter_widget_click(context: BaseEventContext):
     return isinstance(context.event, WidgetClick)
 
@@ -37,17 +41,30 @@ async def on_any_widget_click(context: BaseEventContext):
 
 class MainSG(StatesGroup):
     start = State()
+    second = State()
 
 
 window = Window(
     Format("Window hello, {name}"),
+    Button(
+        text=Format("Next!"),
+        id="y",
+        on_click=next,
+    ),
+    getter=getter,
+    state=MainSG.start,
+)
+
+
+window2 = Window(
+    Format("Second window"),
     Button(
         text=Format("Click me!"),
         id="y",
         on_click=on_click,
     ),
     getter=getter,
-    state=MainSG.start,
+    state=MainSG.second,
 )
 
 

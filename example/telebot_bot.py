@@ -3,7 +3,7 @@ import os
 
 from telebot.async_telebot import AsyncTeleBot
 
-from dialogs import window, simple
+from dialogs import window, simple, window2
 from symposium.integrations.telebot import MessageManager, register_handler, render_telebot
 from symposium.integrations.telebot_states import setup_dialogs
 
@@ -14,6 +14,7 @@ async def main():
     bot.factory = factory
     bot.message_manager = MessageManager(bot)
     registry.include(window)
+    registry.include(window2)
 
     register_handler(simple, bot)
     rendered = await render_telebot(simple)
