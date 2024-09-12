@@ -1,11 +1,9 @@
-import uuid
 from typing import Any
 
 from symposium.core import Router, SymposiumEvent
-from symposium.windows.protocols.storage import StackStorage
-from symposium.windows.protocols.transition_manager import TransitionManager
+from symposium.windows.impl.transitions import TransitionManager
+from symposium.windows.protocols.dialog_manager import DialogManager
 from symposium.windows.registry import DialogRegistry
-from symposium.windows.stack import DialogContext, DialogStack
 from symposium.windows.state import State
 from symposium.windows.widget_context import (
     StatefulEventContext,
@@ -13,20 +11,16 @@ from symposium.windows.widget_context import (
 )
 
 
-class SimpleTransitionManager(TransitionManager):
+class SimpleDialogManager(DialogManager):
     def __init__(
         self,
         chat: Any,
         registry: DialogRegistry,
-        context: DialogContext,
-        stack: DialogStack,
-        storage: StackStorage,
+        transition_manager: TransitionManager,
     ):
         self._chat = chat
         self._registry = registry
-        self._context = context
-        self._stack = stack
-        self._storage = storage
+        self._transition_manager = transition_manager
 
     def event_context(
         self,
@@ -36,9 +30,9 @@ class SimpleTransitionManager(TransitionManager):
     ) -> StatefulEventContext:
         return StatefulEventContext(
             event=event,
-            context=self._context,
-            stack=self._stack,
-            transition_manager=self,
+            context=self._transition_manager.get_current_context(),
+            stack=self._transition_manager.get_current_stack(),
+            dialog_manager=self,
             router=router,
             ui_root=self,
             framework_data=framework_data,
@@ -50,33 +44,31 @@ class SimpleTransitionManager(TransitionManager):
         framework_data: Any,
     ) -> StatefulRenderingContext:
         return StatefulRenderingContext(
-            context=self._context,
-            stack=self._stack,
-            transition_manager=self,
+            context=self._transition_manager.get_current_context(),
+            stack=self._transition_manager.get_current_stack(),
+            dialog_manager=self,
             ui_root=self,
             framework_data=framework_data,
             chat_key=self._chat,
         )
 
-    async def start(self, state: State) -> None:
-        context = DialogContext(
-            _stack_id=self._stack.id,
-            _intent_id=str(uuid.uuid4()),  # FIXME
-            state=state,
-            start_state=state,
-        )
-        self._stack.intents.append(context.id)
-        self._context = context
+    async def _show(self):
+        pass
 
-        await self._storage.save_context(self._chat, self._context)
-        await self._storage.save_stack(self._chat, self._stack)
+    async def close(self):
+        await self._transition_manager.close()
+        await self._show()
+
+    async def start(self, state: State) -> None:
+        await self._transition_manager.start(state)
+        await self._show()
 
     async def switch(self, state: State) -> None:
-        self._context.state = state
-        await self._storage.save_context(self._chat, self._context)
+        await self._transition_manager.switch(state)
+        await self._show()
 
     def get_current_state(self) -> State:
-        return self._context.state
+        return self._transition_manager.get_current_state()
 
     def find(self, widget_id: str) -> Any:
         window = self._registry.find_window(self.get_current_state())

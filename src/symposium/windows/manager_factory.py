@@ -1,7 +1,8 @@
 from symposium.core import Router
-from symposium.windows.impl.simple_manager import SimpleTransitionManager
+from symposium.windows.impl.simple_manager import SimpleDialogManager
+from symposium.windows.impl.transitions import TransitionManager
+from symposium.windows.protocols.dialog_manager import DialogManager
 from symposium.windows.protocols.storage import ContextQuery, StackStorage
-from symposium.windows.protocols.transition_manager import TransitionManager
 from symposium.windows.registry import DialogRegistry
 
 
@@ -19,12 +20,16 @@ class ManagerFactory:
     async def manager(
         self,
         query: ContextQuery,
-    ) -> TransitionManager:
+    ) -> DialogManager:
         stack, context = await self.storge.load_locked(query)
-        return SimpleTransitionManager(
+        transition_manager = TransitionManager(
             chat=query.chat,
             context=context,
             stack=stack,
-            registry=self.registry,
             storage=self.storge,
+        )
+        return SimpleDialogManager(
+            chat=query.chat,
+            registry=self.registry,
+            transition_manager=transition_manager,
         )

@@ -9,7 +9,7 @@ from .stack import DialogContext, DialogStack
 class StatefulContext(BaseContext):
     stack: DialogStack
     context: DialogContext
-    transition_manager: Any
+    dialog_manager: Any
 
 
 @dataclass(frozen=True, kw_only=True)

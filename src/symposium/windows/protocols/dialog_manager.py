@@ -9,7 +9,7 @@ from symposium.windows.widget_context import (
 )
 
 
-class TransitionManager(Finder, Protocol):
+class DialogManager(Finder, Protocol):
     @abstractmethod
     def event_context(
         self,

@@ -13,9 +13,16 @@ from aiogram.types import (
     TelegramObject,
 )
 
-from symposium.core import Finder, Renderer, RenderingContext, RenderingResult
+from symposium.core import (
+    EventContext,
+    Finder,
+    Renderer,
+    RenderingContext,
+    RenderingResult,
+    Router,
+)
 from symposium.events import Click, SymposiumEvent
-from symposium.handle import EventContext, Router
+from symposium.handle import BaseEventContext, RouteRegistry
 from symposium.integrations.telegram_base import ChatContext
 from symposium.render import Keyboard, KeyboardButton, Text
 from symposium.router import SimpleRouter
@@ -83,7 +90,7 @@ async def render_aiogram(
     return to_aiogram(await widget.render(context))
 
 
-def aiogram_event(context: EventContext) -> TelegramObject | None:
+def aiogram_event(context: BaseEventContext) -> TelegramObject | None:
     event = context.event
     while True:
         if isinstance(event, TelegramObject):
@@ -140,7 +147,9 @@ class AiogramRouterAdapter(AiogramRouter):
         await handler.handle(click)
 
 
-def register_handler(widget: BaseWidget, router: AiogramRouter) -> Router:
+def register_handler(
+    widget: BaseWidget, router: AiogramRouter,
+) -> RouteRegistry:
     symposium_router = SimpleRouter()
     widget.register(symposium_router)
 

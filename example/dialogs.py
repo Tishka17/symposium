@@ -2,7 +2,7 @@ from aiogram import Bot
 
 from symposium.core import RenderingContext
 from symposium.events import WidgetClick
-from symposium.handle import EventContext, FunctionalHandler
+from symposium.handle import BaseEventContext, FunctionalHandler
 from symposium.integrations.telegram_base import add_context_id
 from symposium.widgets.group import Group
 from symposium.widgets.keyboard import Button
@@ -17,7 +17,7 @@ async def getter(context: RenderingContext) -> dict:
     return {"name": "Tishka17"}
 
 
-async def on_click(context: EventContext):
+async def on_click(context: BaseEventContext):
     print("Click detected")
     bot: Bot = context.framework_data["bot"]
     await bot.send_message(
@@ -26,12 +26,12 @@ async def on_click(context: EventContext):
     )
 
 
-def filter_widget_click(context: EventContext):
+def filter_widget_click(context: BaseEventContext):
     return isinstance(context.event, WidgetClick)
 
 
 @FunctionalHandler
-async def on_any_widget_click(context: EventContext):
+async def on_any_widget_click(context: BaseEventContext):
     print("Any click")
 
 
@@ -51,7 +51,7 @@ window = Window(
 )
 
 
-async def on_simple_click(context: EventContext):
+async def on_simple_click(context: BaseEventContext):
     bot = context.framework_data["bot"]
     manager = await bot.factory.manager(
         query=ContextQuery(
